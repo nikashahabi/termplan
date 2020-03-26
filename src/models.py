@@ -28,7 +28,7 @@ class Courses(models.Model):
     Day1 = models.CharField(max_length=256, null=True, blank=True)
     Day2 = models.CharField(max_length=256, null=True, blank=True)
     unit = models.IntegerField(null=True, blank=True)
-    exam = models.DateTimeField( null=True, blank=True)
+    exam = models.DateTimeField(null=True, blank=True)
     ta_day = models.CharField(max_length=256, null=True, blank=True)
     ta_time = models.TimeField(null=True, blank=True)
     semester = models.CharField(max_length=256, null=True, blank=True)
