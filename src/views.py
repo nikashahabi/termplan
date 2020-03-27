@@ -2,16 +2,18 @@ import json
 
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
 
 from src.models import Courses
 
 
+@csrf_exempt
 def list_course(request):
     data = json.loads(request.body)
     department = data.get("department")
-    term = data.get("term")
+    semester = data.get("term")
     courses = []
-    data_of_db = Courses.objects.filter(semester=term, department=department)
+    data_of_db = Courses.objects.filter(semester__exact=semester, department__name=department)
     for data in data_of_db:
         courses.append({
             "name": data.name,
@@ -22,10 +24,10 @@ def list_course(request):
             "ta_time": data.ta_time,
             "ta_day": data.ta_day,
             "exam": data.exam,
-            "department": data.department,
+            "department": data.department.name,
             "unit": data.unit,
-            "prof": data.professor,
-            "semester": data.term
+            "prof": data.professor.name,
+            "semester": data.semester
 
         })
         return JsonResponse({"data": courses})
