@@ -1,7 +1,8 @@
 import json
 
+from django.contrib import auth
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 
 from src.models import Courses
@@ -31,3 +32,17 @@ def list_course(request):
 
         })
         return JsonResponse({"data": courses})
+
+
+def login(request):
+    if request.method == 'GET':
+        return render(request, 'auth/../templates/login.html')
+    elif request.method == 'POST':
+        user_name = request.POST['username']
+        pass_word = request.POST['password']
+        user = auth.authenticate(username=user_name, password=pass_word)
+        if user is None:
+            return render(request, 'auth/../templates/login.html', {'Error': 'Wrong user name or password'})
+        else:
+            auth.login(request, user)
+            return redirect('course_list')
