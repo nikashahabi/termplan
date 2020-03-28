@@ -36,18 +36,19 @@ def list_course(request):
         return JsonResponse({"data": courses})
 
 
+@csrf_exempt
 def login(request):
     if request.method == 'GET':
         return render(request, 'auth/../templates/login.html')
     elif request.method == 'POST':
-        user_name = request.POST['username']
-        pass_word = request.POST['password']
+        user_name = request.POST.get('username')
+        pass_word = request.POST.get('password')
         user = auth.authenticate(username=user_name, password=pass_word)
         if user is None:
-            return render(request, 'auth/../templates/login.html', {'Error': 'Wrong user name or password'})
+            return JsonResponse({'Error': 'Wrong user name or password'})
         else:
             auth.login(request, user)
-            return redirect('course_list')
+            return JsonResponse({"text": "good"})
 
 
 def signup(request):
