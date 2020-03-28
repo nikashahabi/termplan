@@ -1,10 +1,12 @@
 import json
 
 from django.contrib import auth
+from django.contrib.auth import authenticate
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 
+from src.forms import SignUpForm
 from src.models import Courses
 
 
@@ -46,3 +48,17 @@ def login(request):
         else:
             auth.login(request, user)
             return redirect('course_list')
+
+
+def signup(request):
+    form = SignUpForm(request.POST)
+    if form.is_valid():
+        form.save()
+        username = form.cleaned_data.get('username')
+        password = form.cleaned_data.get('password1')
+        user = authenticate(username=username, password=password)
+        login(request, user)
+        return redirect('home')
+    else:
+        form = SignUpForm()
+    return render(request, 'signup.html', {'form': form})
