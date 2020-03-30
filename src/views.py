@@ -56,7 +56,7 @@ def add_course(request):
 
 
 @csrf_exempt
-def course_delete(request):
+def delete_course(request):
     data = json.loads(request.body)
     username = data.get("username")
     user = User.objects.filter(username=username).first()

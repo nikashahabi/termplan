@@ -1,9 +1,9 @@
-from django.urls import path
+from django.urls import re_path
 
-from src.views import list_course, add_course, course_delete
+from src.views import list_course, add_course, delete_course
 
 urlpatterns = [
-    path('courses_list', list_course),
-    path('add_course', add_course),
-    path('del_course', course_delete)
+    re_path(r'^courses_list/?$', list_course),
+    re_path(r'^add_course/?$', add_course),
+    re_path(r'^delete_course/?$', delete_course)
 ]
