@@ -81,4 +81,4 @@ def schedule(request):
         "username": "test username",
         "departments": departments
     }
-    return render(request, 'index.html', data)
+    return render(request, 'grid.html', data)
