@@ -2,18 +2,19 @@ import json
 
 from django.db.models import Q
 from django.http import JsonResponse
+from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
-from src.models import SemesterCourse, User, UserCourse
+from src.models import SemesterCourse, User, UserCourse, Department
 
 
 @csrf_exempt
-def list_course(request):
+def courses_list(request):
     data = json.loads(request.body)
-    department = data.get("department")
+    department_id = data.get("dep_id")
     semester = data.get("semester")
     courses = []
-    data_of_db = SemesterCourse.objects.filter(semester__exact=semester, course__department__name=department)
+    data_of_db = SemesterCourse.objects.filter(semester__exact=semester, course__department_id=department_id)
     for data in data_of_db:
         courses.append({
             "name": data.course.name,
@@ -69,3 +70,15 @@ def delete_course(request):
         return JsonResponse({"message": "با موفقیت حذف شد"})
     else:
         return JsonResponse({"message": "درس مورد نظر یافت نشد"})
+
+
+def schedule(request):
+    # username = request.user.username
+    departments = []
+    for dep in Department.objects.all():
+        departments.append({"name": dep.name, "id": dep.id})
+    data = {
+        "username": "test username",
+        "departments": departments
+    }
+    return render(request, 'index.html', data)
