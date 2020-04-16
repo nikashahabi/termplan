@@ -11,7 +11,23 @@ function reply_click(clicked_id){
         panel.style.display = "block";
     }
 }
-
+function submit_button(){
+    var courses = new Array();
+    var index = 0;
+    $("input:checkbox[name=chk]:checked").each(function () {
+                                               courses[index] = $(this).attr("id");
+                                               index++;
+                                               });
+    alert(index);
+    $.ajax({
+           url: '/passed_course',
+           type: 'post',
+           data: JSON.stringify({ passed_courses: courses}),
+           success: function(data) {
+           }
+           });
+    
+}
 function add_course(groupId){
     for(var u in get_courses) {
         if(u == groupId)
