@@ -92,3 +92,5 @@ def schedule(request):
         "departments": departments
     }
     return render(request, 'grid.html', data)
+def graduation (request):
+    return render (request, 'graduation.html')
