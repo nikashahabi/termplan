@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
-from src.models import SemesterCourse, User, UserCourse, Department
+from src.models import SemesterCourse, User, UserCourse, Department, Course
 
 
 @csrf_exempt
@@ -92,3 +92,22 @@ def schedule(request):
         "departments": departments
     }
     return render(request, 'grid.html', data)
+
+
+def show_remained(request, inrange=None):
+    data = json.loads(request.body)
+    username = data.get("username")
+    department = data.get("department")
+    remained = []
+    user_passed, _ = UserCourse.objects.get_or_create(user=username)
+    all_course=Course.objects.get_or_create(department=department)
+    for i in many_chart(department):
+        for courses in all_course:
+            if courses not in user_passed:
+               if courses.isStared:
+
+                else
+
+
+
+
