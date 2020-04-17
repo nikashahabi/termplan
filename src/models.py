@@ -26,6 +26,8 @@ class Course(models.Model):
     unit = models.IntegerField(null=True, blank=True)
     code = models.IntegerField(unique=True)
     department = models.ForeignKey(Department, on_delete=models.CASCADE, default="MCS")
+    chart = models.IntegerField()
+    isStared = models.BooleanField()
 
     def __str__(self):
         return f"course:{self.name} - dep:{self.department}"

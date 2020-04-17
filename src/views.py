@@ -3,6 +3,7 @@ import json
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+
 from src.models import SemesterCourse, User, UserCourse, Department, Course
 
 
@@ -92,7 +93,6 @@ def schedule(request):
     }
     return render(request, 'grid.html', data)
 
-
 def course_chart(request):
     data = json.loads(request.body)
     department = data.get("department")
@@ -116,3 +116,4 @@ def course_chart(request):
 #                if courses.isStared:
 #
 #                 else
+
