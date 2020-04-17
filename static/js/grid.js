@@ -73,7 +73,7 @@ addCourse: function (course, preview, initial) {
         $.ajax({
                url: '/add_course',
                type: 'post',
-               data: JSON.stringify({ course_id: course.id}),
+               data: JSON.stringify({ course_id: course.course_id, semester: "first-98"}),
                success: function(data) {
                }
                });
