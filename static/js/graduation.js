@@ -18,7 +18,6 @@ function submit_button(){
                                                courses[index] = $(this).attr("id");
                                                index++;
                                                });
-    alert(index);
     $.ajax({
            url: '/passed_course',
            type: 'post',
@@ -41,7 +40,11 @@ function add_course(groupId){
            success: function(data){
            var courses = data.data;
            for(i = 0; i < courses.length; i++) {
-           $("#course-group-" + groupId).append(sprintf('<li><input type="checkbox" name="chk" id="%s">%s</input></li>', courses[i].id, courses[i].name));
+           var checked = "unchecked";
+           if(courses[i].isPassed == true){
+           checked = "checked";
+           }
+           $("#course-group-" + groupId).append(sprintf('<li><input type="checkbox" name="chk" id="%s" %s>%s</input></li>', courses[i].id, checked, courses[i].name));
            $("#course-group-" + groupId + " li:last").data('course', courses[i]);
            }
            },
