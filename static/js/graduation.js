@@ -18,15 +18,36 @@ function submit_button(){
                                                courses[index] = $(this).attr("id");
                                                index++;
                                                });
-    alert(index);
+    
     $.ajax({
            url: '/passed_course',
            type: 'post',
            data: JSON.stringify({ passed_courses: courses}),
            success: function(data) {
+           
            }
            });
     
+}
+function group_number(){
+    
+    $.ajax({
+           url: '/course_chart',
+           type: 'post',
+           data: JSON.stringify({ group: "0", user: "temp"}),
+           success: function(data){
+           group_numbers = data.data;
+           create_button(group_numbers);
+           },
+           });
+    
+}
+function create_button(group_numbers){
+    var tedad = parseInt(group_numbers);
+    for(i = 0; i < tedad; i++){
+        
+        $("#main-content-accordian").append(sprintf('<button class="accordion" id="%s" onClick="reply_click(this.id)">درس‌های گروه %s</button> <div class="panel"> <ul id="%s"> </ul> </div>', i+1 , i+1, "course-group-" + (i+1)));
+    }
 }
 function add_course(groupId){
     for(var u in get_courses) {
@@ -35,13 +56,17 @@ function add_course(groupId){
     }
     get_courses[groupId] = groupId;
     $.ajax({
-           url: '/courses_list_group',
+           url: '/course_chart',
            type: 'post',
-           data: { group: groupId},
+           data: JSON.stringify({ group: groupId, user: "temp"}),
            success: function(data){
            var courses = data.data;
            for(i = 0; i < courses.length; i++) {
-           $("#course-group-" + groupId).append(sprintf('<li><input type="checkbox" name="chk" id="%s">%s</input></li>', courses[i].id, courses[i].name));
+           var check = "";
+           if(courses[i].isPassed){
+           check = "checked";
+           }
+           $("#course-group-" + groupId).append(sprintf('<li><input type="checkbox" name="chk" id="%s" %s>%s</input></li>', courses[i].id, check,  courses[i].name));
            $("#course-group-" + groupId + " li:last").data('course', courses[i]);
            }
            },
