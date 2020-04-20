@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
-from src.models import SemesterCourse, User, UserCourse, Department, Course
+from src.models import SemesterCourse, User, UserCourse, Department,Course
 
 
 @csrf_exempt
@@ -116,4 +116,3 @@ def course_chart(request):
 #                if courses.isStared:
 #
 #                 else
-
