@@ -24,6 +24,7 @@ class User(AbstractUser):
 class Course(models.Model):
     name = models.CharField(max_length=256)
     unit = models.IntegerField(null=True, blank=True)
+    code = models.IntegerField(unique=True)
     department = models.ForeignKey(Department, on_delete=models.CASCADE, default="MCS")
 
     def __str__(self):
@@ -33,8 +34,8 @@ class Course(models.Model):
 class SemesterCourse(models.Model):
     semester = models.CharField(max_length=256, null=True, blank=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, null=True, blank=True)
-    start_time = models.TimeField(null=True, blank=True)
-    end_time = models.TimeField(null=True, blank=True)
+    start_time = models.FloatField(null=True, blank=True)
+    end_time = models.FloatField(null=True, blank=True)
     day1 = models.CharField(max_length=256, null=True, blank=True)
     day2 = models.CharField(max_length=256, null=True, blank=True)
     exam = models.DateTimeField(null=True, blank=True)
@@ -42,6 +43,8 @@ class SemesterCourse(models.Model):
     ta_time = models.TimeField(null=True, blank=True)
     professor = models.ForeignKey(Professor, on_delete=models.CASCADE, null=True, blank=True)
     group = models.IntegerField(default=1)
+    info = models.TextField(null=True, blank=True)
+    capacity = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
         return f"course:{self.course.name} - semester:{self.semester}"
