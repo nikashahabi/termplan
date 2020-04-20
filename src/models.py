@@ -26,8 +26,6 @@ class Course(models.Model):
     unit = models.IntegerField(null=True, blank=True)
     code = models.IntegerField(unique=True)
     department = models.ForeignKey(Department, on_delete=models.CASCADE, default="MCS")
-    chart = models.IntegerField()
-    isStared = models.BooleanField()
 
     def __str__(self):
         return f"course:{self.name} - dep:{self.department}"
@@ -36,8 +34,8 @@ class Course(models.Model):
 class SemesterCourse(models.Model):
     semester = models.CharField(max_length=256, null=True, blank=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, null=True, blank=True)
-    start_time = models.TimeField(null=True, blank=True)
-    end_time = models.TimeField(null=True, blank=True)
+    start_time = models.FloatField(null=True, blank=True)
+    end_time = models.FloatField(null=True, blank=True)
     day1 = models.CharField(max_length=256, null=True, blank=True)
     day2 = models.CharField(max_length=256, null=True, blank=True)
     exam = models.DateTimeField(null=True, blank=True)
