@@ -149,7 +149,7 @@ function get_course_list(department_id) {
         $.ajax({
             url: '/courses_list',
             type: 'post',
-            data: JSON.stringify({"dep_id": department_id, "semester": "98-1"}),
+            data: JSON.stringify({dep_id: department_id, semester: "98-1"}),
             success: function (data) {
                 var courses = data.data;
                 $("#course-group-list").empty();
@@ -234,7 +234,7 @@ $(".grid").on("click", ".del-button", function () {
     $.ajax({
         url: '/delete_course',
         type: 'post',
-        data: JSON.stringify({course_id: $(this).parent().attr('course-id')}),
+        data: JSON.stringify({course_id: $(this).parent().attr('course-id'),semester:"98-1"}),
         success: function (data) {
             grid.removeCourse(cid);
             $('.course-' + cid).remove();
