@@ -3,7 +3,7 @@ import json
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from terminator.src.models import SemesterCourse, User, UserCourse, Department, Course
+from terminator.src.models import SemesterCourse, User, UserCourse, Department, Course, UserPassed
 
 
 @csrf_exempt
@@ -92,37 +92,38 @@ def schedule(request):
     }
     return render(request, 'grid.html', data)
 
-def course_chart(request):
-    data = json.loads(request)
-    user = data.get("user")
-    department = User.objects.get(user)
-    #TODO:have a constant file read chart from that.
-    return render(request, 'grid.html', 5)
-
 
 def graduation(request):
     data = json.loads(request.body)
-    department = data.get("department")
+    user = data.get("user")
     chart_no = data.get("chart_no")
-    all_course = Course.objects.get(department=department,chart_no=chart_no)
-    list_course = []
-    for course in all_course:
-        list_course.append({
-            "course_id": Course.code,
-            "course_name": Course.name,
-        })
-    return render(request, 'graduation.html', list_course)
+    if chart_no == 0:
+        user_in_db = User.objects.filter(user=user)
+        department = user_in_db.department
+        user_log = UserPassed.objects.filter(user=user)
+        if not user_log:
+            user_courses = Course.objects.get(department=department)
+            UserPassed.add(user_courses)
+        # TODO:have a constant file read chart from that.
+        return render(request, 'grid.html', 5)
+    else:
+        data_of_db = UserPassed.objects.get(user=user, courses__chart_no=chart_no)
+        list_course = []
+        for data in data_of_db:
+            list_course.append({
+                "course_id": data.courses.id,
+                "course_name": data.courses.name,
+                "is_passed": data.is_passed
+            })
+        return render(request, 'graduation.html', list_course)
 
 
 def add_passed_course(request):
     data = json.loads(request.body)
     user = data.get("user")
-    course_id = data.get("course_id")
-    course_code, course_group = course_id.split("-")
-    print(course_code, course_group)
-    semester = data.get("semester")
-    selected_course = SemesterCourse.objects.filter(course__code=course_code, group=course_group,
-                                                    semester=semester).first()
+    courses = data.get("courses")
+    for course in courses:
+        UserPassed.objects.filter(user=user, UserPassed__courses_code=course.get("code")).update(is_passed=True)
 # def show_remained(request):
 #     data = json.loads(request.body)
 #     username = data.get("username")

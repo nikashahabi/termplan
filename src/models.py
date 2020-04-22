@@ -62,4 +62,5 @@ class UserCourse(models.Model):
 
 class UserPassed(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    courses = models.ManyToManyField(SemesterCourse)
+    courses = models.ForeignKey(Course,on_delete=models.CASCADE)
+    is_passed = models.BooleanField(default=False)
