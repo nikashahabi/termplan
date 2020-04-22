@@ -26,6 +26,7 @@ class Course(models.Model):
     unit = models.IntegerField(null=True, blank=True)
     code = models.IntegerField(unique=True)
     department = models.ForeignKey(Department, on_delete=models.CASCADE, default="MCS")
+    chart_no = models.IntegerField()
 
     def __str__(self):
         return f"course:{self.name} - dep:{self.department}"
@@ -57,3 +58,8 @@ class UserCourse(models.Model):
 
     def __str__(self):
         return f"user:{self.user.username} - semester:{self.semester}"
+
+
+class UserPassed(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    courses = models.ManyToManyField(SemesterCourse)

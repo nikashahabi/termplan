@@ -3,8 +3,7 @@ import json
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-
-from src.models import SemesterCourse, User, UserCourse, Department,Course
+from terminator.src.models import SemesterCourse, User, UserCourse, Department, Course
 
 
 @csrf_exempt
@@ -94,14 +93,36 @@ def schedule(request):
     return render(request, 'grid.html', data)
 
 def course_chart(request):
+    data = json.loads(request)
+    user = data.get("user")
+    department = User.objects.get(user)
+    #TODO:have a constant file read chart from that.
+    return render(request, 'grid.html', 5)
+
+
+def graduation(request):
     data = json.loads(request.body)
     department = data.get("department")
-    all_course = Course.objects.get(department=department)
+    chart_no = data.get("chart_no")
+    all_course = Course.objects.get(department=department,chart_no=chart_no)
     list_course = []
     for course in all_course:
-        list_course[course.chart].append(course)
+        list_course.append({
+            "course_id": Course.code,
+            "course_name": Course.name,
+        })
     return render(request, 'graduation.html', list_course)
 
+
+def add_passed_course(request):
+    data = json.loads(request.body)
+    user = data.get("user")
+    course_id = data.get("course_id")
+    course_code, course_group = course_id.split("-")
+    print(course_code, course_group)
+    semester = data.get("semester")
+    selected_course = SemesterCourse.objects.filter(course__code=course_code, group=course_group,
+                                                    semester=semester).first()
 # def show_remained(request):
 #     data = json.loads(request.body)
 #     username = data.get("username")
