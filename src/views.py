@@ -4,7 +4,8 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
-from src.models import SemesterCourse, User, UserCourse, Department, Course, UserPassed
+from terminator.src import statics
+from terminator.src.models import SemesterCourse, User, UserCourse, Department, Course, UserPassed
 
 
 @csrf_exempt
@@ -127,17 +128,30 @@ def add_passed_course(request):
     courses = data.get("courses")
     for course in courses:
         UserPassed.objects.filter(user=user, UserPassed__courses_code=course.get("code")).update(is_passed=True)
-# def show_remained(request):
-#     data = json.loads(request.body)
-#     username = data.get("username")
-#     department = data.get("department")
-#     passed_courses=data.get()
-#     remained = []
-#     user_passed, _ = UserCourse.objects.get_or_create(user=username)
-#     all_course=Course.objects.get(department=department)
-#     for i in many_chart(department):
-#         for courses in all_course:
-#             if courses not in user_passed:
-#                if courses.isStared:
-#
-#                 else
+
+
+def show_remained(request):
+    data = json.loads(request.body)
+    username = data.get("username")
+    table_number = data.get("table_num")
+    user = User.objects.filter(username=username).first()
+    department = user.department
+    all_courses = Course.objects.get(department=department, table=table_number)
+    user_record = UserPassed.objects.filter(user=user, course__table=table_number)
+    remained = []
+    passed_unit = 0
+    for course in all_courses:
+        for user_course in user_record:
+            if user_course.course.code == course.code:
+                if course.is_stared and not user_course.ispassed:
+                    remained.append({"course_name": course.department,
+                                     "necessity": True})
+        for user_course in user_record:
+            if not user_course.course.is_stared:
+                passed_unit += user_course.course.unit
+
+        if passed_unit <= statics.department_table_i:
+            for user_course in user_record:
+                if not user_course.course.is_stared:
+                    remained.append({"course_name": course.department,
+                                     "necessity": False})
