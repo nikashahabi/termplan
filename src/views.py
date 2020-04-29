@@ -137,15 +137,13 @@ def show_remained(request):
     user = User.objects.filter(username=username).first()
     department = user.department
     all_courses = Course.objects.get(department=department, table=table_number)
-    user_record = UserPassed.objects.filter(user=user, course__table=table_number)
+    user_record = UserPassed.objects.filter(user=user, course__table=table_number, is_passed=True)
     remained = []
     passed_unit = 0
     for course in all_courses:
-        for user_course in user_record:
-            if user_course.course.code == course.code:
-                if course.is_stared and not user_course.ispassed:
-                    remained.append({"course_name": course.department,
-                                     "necessity": True})
+        if course.is_stared and course not in user_record:
+            remained.append({"course_name": course.department,
+                             "necessity": True})
         for user_course in user_record:
             if not user_course.course.is_stared:
                 passed_unit += user_course.course.unit
