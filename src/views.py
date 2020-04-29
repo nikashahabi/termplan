@@ -3,7 +3,8 @@ import json
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from terminator.src.models import SemesterCourse, User, UserCourse, Department, Course, UserPassed
+
+from src.models import SemesterCourse, User, UserCourse, Department, Course, UserPassed
 
 
 @csrf_exempt
@@ -93,29 +94,31 @@ def schedule(request):
     return render(request, 'grid.html', data)
 
 
+@csrf_exempt
 def graduation(request):
     data = json.loads(request.body)
-    user = data.get("user")
-    chart_no = data.get("chart_no")
-    if chart_no == 0:
-        user_in_db = User.objects.filter(user=user)
-        department = user_in_db.department
+    username = data.get("user")
+    table_no = data.get("group")
+    user = User.objects.filter(username=username).first()
+    if table_no == 0:
+        department = user.department
         user_log = UserPassed.objects.filter(user=user)
-        if not user_log:
-            user_courses = Course.objects.get(department=department)
-            UserPassed.add(user_courses)
-        # TODO:have a constant file read chart from that.
-        return render(request, 'grid.html', 5)
-    else:
-        data_of_db = UserPassed.objects.get(user=user, courses__chart_no=chart_no)
-        list_course = []
-        for data in data_of_db:
-            list_course.append({
-                "course_id": data.courses.id,
-                "course_name": data.courses.name,
-                "is_passed": data.is_passed
-            })
-        return render(request, 'graduation.html', list_course)
+        if not user_log.exists():
+            courses = Course.objects.filter(department=department)
+            for course in courses:
+                UserPassed.objects.create(course=course, user=user, is_passed=False)
+
+        table_count = department.table_count
+        return render(request, 'grid.html', {"group_count": table_count})
+    user_log = UserPassed.objects.filter(user=user, course__table=table_no)
+    course_list = []
+    for data in user_log:
+        course_list.append({
+            "course_id": data.course.code,
+            "course_name": data.courses.name,
+            "is_passed": data.is_passed
+        })
+    return render(request, 'graduation.html', {"user_courses": course_list})
 
 
 def add_passed_course(request):
