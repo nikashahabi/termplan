@@ -4,6 +4,7 @@ from django.db import models
 
 class Department(models.Model):
     name = models.CharField(max_length=256)
+    table_count = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -26,7 +27,7 @@ class Course(models.Model):
     unit = models.IntegerField(null=True, blank=True)
     code = models.IntegerField(unique=True)
     department = models.ForeignKey(Department, on_delete=models.CASCADE, default="MCS")
-    chart_no = models.IntegerField()
+    table = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
         return f"course:{self.name} - dep:{self.department}"
@@ -62,5 +63,5 @@ class UserCourse(models.Model):
 
 class UserPassed(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    courses = models.ForeignKey(Course,on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
     is_passed = models.BooleanField(default=False)
