@@ -47,6 +47,7 @@ var grid = {
             localStorage.setItem("addedItems", JSON.stringify(grid.addedItems));
 
         }
+
         for (var i = 0; i < course.events.length; i++) {
             console.log(course.events);
             var startY = calculatePixel(course.events[i].start);
