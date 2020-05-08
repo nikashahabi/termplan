@@ -4,10 +4,20 @@ from django.db import models
 
 class Department(models.Model):
     name = models.CharField(max_length=256)
-    table_count = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
         return self.name
+
+
+class ChartTable(models.Model):
+    name = models.CharField(max_length=128, blank=True, null=True)
+    code = models.IntegerField(blank=True, null=True)
+    dep = models.ForeignKey(Department, on_delete=models.CASCADE)
+    req_passed_units = models.IntegerField(blank=True, null=True)
+    info = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"dep: {self.dep} - table{self.code} : {self.name}"
 
 
 class Professor(models.Model):
@@ -15,7 +25,7 @@ class Professor(models.Model):
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"professor: {self.name} - dep:{self.department}"
+        return f"professor: {self.name} - dep:{self.department.name}"
 
 
 class User(AbstractUser):
@@ -27,7 +37,8 @@ class Course(models.Model):
     unit = models.IntegerField(null=True, blank=True)
     code = models.IntegerField(unique=True)
     department = models.ForeignKey(Department, on_delete=models.CASCADE, default="MCS")
-    table = models.IntegerField(null=True, blank=True)
+    table = models.ForeignKey(ChartTable, on_delete=models.CASCADE, null=True)
+    is_starred = models.BooleanField(default=False)
 
     def __str__(self):
         return f"course:{self.name} - dep:{self.department}"
@@ -52,7 +63,7 @@ class SemesterCourse(models.Model):
         return f"course:{self.course.name} - semester:{self.semester}"
 
 
-class UserCourse(models.Model):
+class UserSchedule(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     courses = models.ManyToManyField(SemesterCourse)
     semester = models.CharField(max_length=256, null=True, blank=True)
@@ -63,5 +74,8 @@ class UserCourse(models.Model):
 
 class UserPassed(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    is_passed = models.BooleanField(default=False)
+    courses = models.ManyToManyField(Course)
+    units = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"user: {self.user.username} - units: {self.units}"
