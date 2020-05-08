@@ -4,8 +4,8 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
-from terminator.src import statics
-from terminator.src.models import SemesterCourse, User, UserCourse, Department, Course, UserPassed
+from src import constants
+from src.models import SemesterCourse, User, UserSchedule, Department, Course, UserPassed, ChartTable
 
 
 @csrf_exempt
@@ -51,7 +51,7 @@ def add_course(request):
     semester = data.get("semester")
     selected_course = SemesterCourse.objects.filter(course__code=course_code, group=course_group,
                                                     semester=semester).first()
-    user_semester, _ = UserCourse.objects.get_or_create(user=user, semester=semester)
+    user_semester, _ = UserSchedule.objects.get_or_create(user=user, semester=semester)
     # overlapping_course = user_semester.courses.filter(Q(day1=wanted_course.day1) | Q(day2=wanted_course.day2), Q(
     #     start_time__range=(wanted_course.start_time, wanted_course.end_time)) | Q(
     #     end_time__range=(wanted_course.start_time, wanted_course.end_time))).exclude(
@@ -75,7 +75,7 @@ def delete_course(request):
     course_code, course_group = course_id.split("-")
     selected_course = SemesterCourse.objects.filter(course__code=course_code, group=course_group,
                                                     semester=semester).first()
-    user_semester, _ = UserCourse.objects.get_or_create(user=user, semester=semester)
+    user_semester, _ = UserSchedule.objects.get_or_create(user=user, semester=semester)
     if selected_course in user_semester.courses.all():
         user_semester.courses.remove(selected_course)
         return JsonResponse({"message": "با موفقیت حذف شد"})
@@ -97,39 +97,46 @@ def schedule(request):
 
 @csrf_exempt
 def graduation(request):
-    data = json.loads(request.body)
-    username = data.get("user")
-    table_no = data.get("group")
-    user = User.objects.filter(username=username).first()
-    if table_no == 0:
+    if request.POST:
+        data = json.loads(request.body)
+        username = data.get("user")
+        table_no = data.get("group")
+        user = User.objects.filter(username=username).first()
         department = user.department
-        user_log = UserPassed.objects.filter(user=user)
-        if not user_log.exists():
-            courses = Course.objects.filter(department=department)
-            for course in courses:
-                UserPassed.objects.create(course=course, user=user, is_passed=False)
-
-        table_count = department.table_count
-        return render(request, 'grid.html', {"group_count": table_count})
-    user_log = UserPassed.objects.filter(user=user, course__table=table_no)
-    course_list = []
-    for data in user_log:
-        course_list.append({
-            "course_id": data.course.code,
-            "course_name": data.courses.name,
-            "is_passed": data.is_passed
-        })
-    return render(request, 'graduation.html', {"user_courses": course_list})
+        if table_no == 0:
+            table_count = ChartTable.objects.filter(department=department).count()
+            return render(request, 'grid.html', {"group_count": table_count})
+        user_passed_courses = UserPassed.objects.filter(user=user, courses__table__code=table_no)
+        table_courses = Course.objects.filter(table__code=table_no, department=user.department)
+        course_list = []
+        for course in table_courses:
+            course_list.append({
+                "course_id": course.code,
+                "course_name": course.name,
+                "is_passed": True if course in user_passed_courses else False
+            })
+        return render(request, 'graduation.html', {"user_courses": course_list})
+    return render(request, 'graduation.html')
 
 
+@csrf_exempt
 def add_passed_course(request):
     data = json.loads(request.body)
-    user = data.get("user")
+    username = data.get("username")
     courses = data.get("courses")
-    for course in courses:
-        UserPassed.objects.filter(user=user, UserPassed__courses_code=course.get("code")).update(is_passed=True)
+    user = User.objects.filter(username=username).first()
+    user_passed, _ = UserPassed.objects.get_or_create(user=user)
+    for crs in courses:
+        course = Course.objects.filter(code=crs.get("code")).first()
+        if course not in user_passed.courses.all():
+            user_passed.courses.add(course)
+            passed_units = user_passed.units
+            user_passed.units = passed_units + course.unit
+            user_passed.save()
+    return JsonResponse({})
 
 
+@csrf_exempt
 def show_remained(request):
     data = json.loads(request.body)
     username = data.get("username")
@@ -141,15 +148,16 @@ def show_remained(request):
     remained = []
     passed_unit = 0
     for course in all_courses:
-        if course.is_stared and course not in user_record:
-            remained.append({"course_name": course.department,
+        if course.is_starred and course not in user_record:
+            remained.append({"course_name": course.name,
+                             "course_id": data.course.code,
                              "necessity": True})
-        for user_course in user_record:
-            if not user_course.course.is_stared:
-                passed_unit += user_course.course.unit
+    for user_course in user_record:
+        if not user_course.course.is_starred:
+            passed_unit += user_course.course.unit
 
-        if passed_unit <= statics.department_table_i:
-            for user_course in user_record:
-                if not user_course.course.is_stared:
-                    remained.append({"course_name": course.department,
-                                     "necessity": False})
+    if passed_unit <= constants.department_table_i:
+        for user_course in user_record:
+            if not user_course.course.is_starred:
+                remained.append({"course_name": user_course.course.department,
+                                 "necessity": False})
