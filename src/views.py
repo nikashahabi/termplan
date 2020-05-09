@@ -144,20 +144,25 @@ def show_remained(request):
     user = User.objects.filter(username=username).first()
     department = user.department
     all_courses = Course.objects.get(department=department, table=table_number)
-    user_record = UserPassed.objects.filter(user=user, course__table=table_number, is_passed=True)
+    user_passed_courses = UserPassed.objects.filter(user=user, courses__table__code=table_number)
     remained = []
     passed_unit = 0
     for course in all_courses:
-        if course.is_starred and course not in user_record:
+        if course.is_starred and course not in user_passed_courses:
             remained.append({"course_name": course.name,
                              "course_id": data.course.code,
                              "necessity": True})
-    for user_course in user_record:
+    for user_course in user_passed_courses:
         if not user_course.course.is_starred:
             passed_unit += user_course.course.unit
 
-    if passed_unit <= constants.department_table_i:
-        for user_course in user_record:
+    passed_req = ChartTable.objects.filter(dep=department, num=table_number)
+    if passed_unit <= passed_req:
+        for user_course in user_passed_courses:
             if not user_course.course.is_starred:
                 remained.append({"course_name": user_course.course.department,
                                  "necessity": False})
+    return render(request, 'graduation.html', {
+        "username": username,
+        "remain":remained
+    })
