@@ -14,6 +14,7 @@ class ChartTable(models.Model):
     code = models.IntegerField(blank=True, null=True)
     dep = models.ForeignKey(Department, on_delete=models.CASCADE)
     req_passed_units = models.IntegerField(blank=True, null=True)
+    req_not_stared_units = models.IntegerField(blank=True, null=True)
     info = models.TextField(blank=True, null=True)
 
     def __str__(self):

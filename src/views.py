@@ -154,14 +154,26 @@ def show_remained(request):
     for user_course in user_passed_courses.courses.all():
         if not user_course.is_starred:
             passed_unit += user_course.unit
-
-    chart_table = ChartTable.objects.filter(dep=department, code=table_number).first()
+    chart = ChartTable.objects.filter(department=department, code=table_number).first()
+    optional_remained = chart.req_not_stared_units - passed_unit
+    # chart_table = ChartTable.objects.filter(dep=department, code=table_number).first()
     # if passed_unit <= chart_table.req_passed_units:
     #     for user_course in user_passed_courses.courses.all():
     #         if not user_course.is_starred:
     #             remained.append({"course_name": user_course.course.department,
     #                              "necessity": False})
+    user_passed_courses = UserPassed.objects.filter(user=user, courses__table__code=table_number).first()
+    table_courses = Course.objects.filter(table__code=table_number, department=department)
+    course_list = []
+    for course in table_courses:
+        course_list.append({
+            "course_id": course.code,
+            "course_name": course.name,
+            "is_passed": True if course in user_passed_courses.courses.all() else False
+        })
     return render(request, 'graduation.html', {
         "username": username,
-        "remain": remained
+        "remain": remained,
+        "optional_remained": optional_remained,
+        "chart_course": course_list
     })
