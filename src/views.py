@@ -142,25 +142,25 @@ def show_remained(request):
     table_number = data.get("table_num")
     user = User.objects.filter(username=username).first()
     department = user.department
-    all_courses = Course.objects.get(department=department, table=table_number)
-    user_passed_courses = UserPassed.objects.filter(user=user, courses__table__code=table_number)
+    all_courses = Course.objects.filter(department=department, table=table_number)
+    user_passed_courses = UserPassed.objects.filter(user=user, courses__table__code=table_number).first()
     remained = []
     passed_unit = 0
     for course in all_courses:
-        if course.is_starred and course not in user_passed_courses:
+        if course.is_starred and course not in user_passed_courses.courses.all():
             remained.append({"course_name": course.name,
-                             "course_id": data.course.code,
+                             "course_id": course.code,
                              "necessity": True})
-    for user_course in user_passed_courses:
-        if not user_course.course.is_starred:
-            passed_unit += user_course.course.unit
+    for user_course in user_passed_courses.courses.all():
+        if not user_course.is_starred:
+            passed_unit += user_course.unit
 
-    passed_req = ChartTable.objects.filter(dep=department, num=table_number)
-    if passed_unit <= passed_req:
-        for user_course in user_passed_courses:
-            if not user_course.course.is_starred:
-                remained.append({"course_name": user_course.course.department,
-                                 "necessity": False})
+    chart_table = ChartTable.objects.filter(dep=department, code=table_number).first()
+    # if passed_unit <= chart_table.req_passed_units:
+    #     for user_course in user_passed_courses.courses.all():
+    #         if not user_course.is_starred:
+    #             remained.append({"course_name": user_course.course.department,
+    #                              "necessity": False})
     return render(request, 'graduation.html', {
         "username": username,
         "remain": remained
