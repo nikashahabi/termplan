@@ -4,7 +4,6 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
-from src import constants
 from src.models import SemesterCourse, User, UserSchedule, Department, Course, UserPassed, ChartTable
 
 
@@ -97,7 +96,7 @@ def schedule(request):
 
 @csrf_exempt
 def graduation(request):
-    if request.POST:
+    if request.method == "POST":
         data = json.loads(request.body)
         username = data.get("user")
         table_no = data.get("group")
@@ -106,14 +105,14 @@ def graduation(request):
         if table_no == 0:
             table_count = ChartTable.objects.filter(department=department).count()
             return render(request, 'grid.html', {"group_count": table_count})
-        user_passed_courses = UserPassed.objects.filter(user=user, courses__table__code=table_no)
+        user_passed_courses = UserPassed.objects.filter(user=user, courses__table__code=table_no).first()
         table_courses = Course.objects.filter(table__code=table_no, department=user.department)
         course_list = []
         for course in table_courses:
             course_list.append({
                 "course_id": course.code,
                 "course_name": course.name,
-                "is_passed": True if course in user_passed_courses else False
+                "is_passed": True if course in user_passed_courses.courses.all() else False
             })
         return render(request, 'graduation.html', {"user_courses": course_list})
     return render(request, 'graduation.html')
@@ -164,5 +163,5 @@ def show_remained(request):
                                  "necessity": False})
     return render(request, 'graduation.html', {
         "username": username,
-        "remain":remained
+        "remain": remained
     })
