@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>file_upload</title>
+</head>
+<body>
+<form action="{% url 'students:student_dashboard_bulk_invite' %}" method="POST"
+      enctype="multipart/form-data">
+    <div class="form-settings notes-form">
+        {% csrf_token %}
+        {{ upload_form }}
+        <button id="invite-tutor-btn" class="btn btn-primary margin-top"
+                data-loading-text="Loading..." type="submit">Save
+        </button>
+    </div>
+</form>
+</body>
+</html>
