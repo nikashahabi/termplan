@@ -153,6 +153,7 @@ def show_remained(request):
         if course.is_starred and course not in user_passed_courses.courses.all():
             remained.append({"course_name": course.name,
                              "course_id": course.code,
+                             "course_unit": course.unit,
                              "necessity": True})
     for user_course in user_passed_courses.courses.all():
         if not user_course.is_starred:
