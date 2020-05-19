@@ -34,7 +34,7 @@ function submit_button() {
 function group_number() {
 
     $.ajax({
-        url: '/course_chart',
+        url: '/graduation',
         type: 'post',
         data: JSON.stringify({group: "0", user: "temp"}),
         success: function (data) {
@@ -60,7 +60,7 @@ function add_course(groupId) {
     }
     get_courses[groupId] = groupId;
     $.ajax({
-        url: '/course_chart',
+        url: '/graduation',
         type: 'post',
         data: JSON.stringify({group: groupId, user: "temp"}),
         success: function (data) {

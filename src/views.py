@@ -7,7 +7,7 @@ from django.views.generic import ListView
 
 from src.models import SemesterCourse, User, UserSchedule, Department, Course, UserPassed, ChartTable
 
-from terminator.src.excel_handeler import handle_uploaded_file
+# from terminator.src.excel_handeler import handle_uploaded_file
 
 
 @csrf_exempt
@@ -99,15 +99,16 @@ def schedule(request):
 
 @csrf_exempt
 def graduation(request):
+
     if request.method == "POST":
         data = json.loads(request.body)
         username = data.get("user")
         table_no = data.get("group")
         user = User.objects.filter(username=username).first()
         department = user.department
-        if table_no == 0:
-            table_count = ChartTable.objects.filter(department=department).count()
-            return render(request, 'grid.html', {"group_count": table_count})
+        if table_no == "0":
+            table_count = ChartTable.objects.filter(dep=department).count()
+            return JsonResponse({"group_count": table_count})
         user_passed_courses = UserPassed.objects.filter(user=user, courses__table__code=table_no).first()
         table_courses = Course.objects.filter(table__code=table_no, department=user.department)
         course_list = []
@@ -117,7 +118,7 @@ def graduation(request):
                 "course_name": course.name,
                 "is_passed": True if course in user_passed_courses.courses.all() else False
             })
-        return render(request, 'graduation.html', {"user_courses": course_list})
+        return JsonResponse({"user_courses": course_list})
     return render(request, 'graduation.html')
 
 
@@ -182,15 +183,15 @@ def show_remained(request):
         "chart_course": course_list
     })
 
-
-class SemesterCourseAddView(ListView):
-    model = SemesterCourse
-    template_name = 'semester_course_add.html'
-
-    def post(self, request):
-        try:
-            handle_uploaded_file(request, request.FILES['semester_file'])
-            success = True
-        except:
-            success = False
-        return render(request, 'semester_course_add.html', {"success": success})
+#
+# class SemesterCourseAddView(ListView):
+#     model = SemesterCourse
+#     template_name = 'semester_course_add.html'
+#
+#     def post(self, request):
+#         try:
+#             handle_uploaded_file(request, request.FILES['semester_file'])
+#             success = True
+#         except:
+#             success = False
+#         return render(request, 'semester_course_add.html', {"success": success})
