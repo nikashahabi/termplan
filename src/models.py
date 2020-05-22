@@ -52,7 +52,7 @@ class SemesterCourse(models.Model):
     end_time = models.FloatField(null=True, blank=True)
     day1 = models.CharField(max_length=256, null=True, blank=True)
     day2 = models.CharField(max_length=256, null=True, blank=True)
-    exam = models.DateTimeField(null=True, blank=True)
+    exam = models.CharField(max_length=128, null=True, blank=True)
     ta_day = models.CharField(max_length=256, null=True, blank=True)
     ta_time = models.TimeField(null=True, blank=True)
     professor = models.ForeignKey(Professor, on_delete=models.CASCADE, null=True, blank=True)
