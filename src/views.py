@@ -3,11 +3,10 @@ import json
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import ListView
+from rest_framework.views import APIView
 
+from src.excel_handeler import handle_uploaded_semester_file
 from src.models import SemesterCourse, User, UserSchedule, Department, Course, UserPassed, ChartTable
-
-# from terminator.src.excel_handeler import handle_uploaded_file
 
 
 @csrf_exempt
@@ -99,7 +98,6 @@ def schedule(request):
 
 @csrf_exempt
 def graduation(request):
-
     if request.method == "POST":
         data = json.loads(request.body)
         username = data.get("user")
@@ -183,15 +181,12 @@ def show_remained(request):
         "chart_course": course_list
     })
 
-#
-# class SemesterCourseAddView(ListView):
-#     model = SemesterCourse
-#     template_name = 'semester_course_add.html'
-#
-#     def post(self, request):
-#         try:
-#             handle_uploaded_file(request, request.FILES['semester_file'])
-#             success = True
-#         except:
-#             success = False
-#         return render(request, 'semester_course_add.html', {"success": success})
+
+class SemesterCourseAddView(APIView):
+
+    def post(self, request):
+        success = handle_uploaded_semester_file(request.FILES['semester_file'])
+        return render(request, 'semester_course_add.html', {"success": success})
+
+    def get(self, request):
+        return render(request, 'semester_course_add.html', {"message": "فایل را ارسال کنید"})
