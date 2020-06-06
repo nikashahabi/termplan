@@ -73,20 +73,20 @@ def handle_uploaded_department_file(f):
                 dep = Department.objects.filter(name=dep).first()
                 course = Course.objects.filter(code=code).first()
                 if ChartTable.objects.filter(course=course).exists():
-                    semester_course = SemesterCourse.objects.filter(course=course).update(name=name,
-                                                                                          code=code,
-                                                                                          dep=dep,
-                                                                                          req_passed_units=req_passed_units,
-                                                                                          req_not_stared_units=req_not_stared_units,
-                                                                                          info=info)
+                    chart_table = ChartTable.objects.filter(course=course).update(name=name,
+                                                                                  code=code,
+                                                                                  dep=dep,
+                                                                                  req_passed_units=req_passed_units,
+                                                                                  req_not_stared_units=req_not_stared_units,
+                                                                                  info=info)
                     continue
 
-                semester_course = SemesterCourse.objects.create(name=name,
-                                                                code=code,
-                                                                dep=dep,
-                                                                req_passed_units=req_passed_units,
-                                                                req_not_stared_units=req_not_stared_units,
-                                                                info=info)
+                chart_table = ChartTable.objects.create(name=name,
+                                                        code=code,
+                                                        dep=dep,
+                                                        req_passed_units=req_passed_units,
+                                                        req_not_stared_units=req_not_stared_units,
+                                                        info=info)
 
             success = True
         except:
