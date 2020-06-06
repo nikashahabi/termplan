@@ -1,6 +1,6 @@
 import xlrd
 
-from src.models import SemesterCourse, Course, Professor, Department
+from src.models import SemesterCourse, Course, Professor, Department, ChartTable
 
 
 def handle_uploaded_semester_file(f):
@@ -49,6 +49,44 @@ def handle_uploaded_semester_file(f):
                                                                 ta_day=ta_day, professor=professor,
                                                                 group=group, info=info,
                                                                 capacity=capacity)
+
+            success = True
+        except:
+            success = False
+        print(success)
+    return success
+
+
+def handle_uploaded_department_file(f):
+    course = xlrd.open_workbook(file_contents=f.read())
+    for sheet in course.sheets():
+        try:
+            number_of_rows = sheet.nrows
+            for row in range(1, number_of_rows):
+                name = sheet.cell(row, 0).value
+                code = sheet.cell(row, 1).value
+                dep = sheet.cell(row, 2).value
+                req_passed_units = sheet.cell(row, 3).value
+                req_not_stared_units = sheet.cell(row, 4).value
+                info = sheet.cell(row, 5).value
+
+                dep = Department.objects.filter(name=dep).first()
+                course = Course.objects.filter(code=code).first()
+                if ChartTable.objects.filter(course=course).exists():
+                    semester_course = SemesterCourse.objects.filter(course=course).update(name=name,
+                                                                                          code=code,
+                                                                                          dep=dep,
+                                                                                          req_passed_units=req_passed_units,
+                                                                                          req_not_stared_units=req_not_stared_units,
+                                                                                          info=info)
+                    continue
+
+                semester_course = SemesterCourse.objects.create(name=name,
+                                                                code=code,
+                                                                dep=dep,
+                                                                req_passed_units=req_passed_units,
+                                                                req_not_stared_units=req_not_stared_units,
+                                                                info=info)
 
             success = True
         except:
