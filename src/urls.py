@@ -1,7 +1,7 @@
 from django.urls import re_path
 
 from src.views import courses_list, add_course, delete_course, schedule, graduation, add_passed_course, show_remained, \
-    SemesterCourseAddView
+    SemesterCourseAddView, DepartmentChartAddView
 
 app_name = 'src'
 urlpatterns = [
@@ -14,6 +14,6 @@ urlpatterns = [
     re_path(r'^remained_courses/?$', show_remained),
     re_path(r'^upload_semester_file/?$', SemesterCourseAddView.as_view(), name='upload_file'),
     re_path(r'^upload_department_file/?$', DepartmentChartAddView.as_view(), name='upload_file')
-    # re_path(r'^course_chart/', course_chart)
+    re_path(r'^course_chart/', course_chart)
 
 ]
