@@ -111,8 +111,10 @@ def graduation(request):
         if table_no == "0":
             table_count = ChartTable.objects.filter(dep=department).count()
             return JsonResponse({"group_count": table_count})
-        user_passed_courses = UserPassed.objects.filter(user=user, courses__table__code=table_no).first()
+        user_passed_courses = UserPassed.objects.filter(user=user).first()
+        print(user_passed_courses)
         table_courses = Course.objects.filter(table__code=table_no, department=user.department)
+        print(table_courses)
         course_list = []
         for course in table_courses:
             course_list.append({
