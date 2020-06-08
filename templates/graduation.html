@@ -1,72 +1,72 @@
+<style>
+    .accordion {
+        background-color: #eee;
+        border-left-width: 100px;
+        color: #444;
+        cursor: pointer;
+        padding: 18px;
+        width: 100%;
+        border: none;
+        text-align: center;
+        outline: none;
+        font-size: 15px;
+        transition: 0.4s;
+        /*right: 100px;
+        left:100px;*/
+    }
+
+    .active, .accordion:hover {
+        background-color: #ccc;
+    }
+
+    .panel {
+        text-align: center;
+        padding: 0 18px;
+        display: none;
+        background-color: white;
+        overflow: hidden;
+
+    }
+
+    /*
+    table {
+      font-family: arial, sans-serif;
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    td, th {
+      border: 1px solid #dddddd;
+      text-align: left;
+      padding: 8px;
+    }
+
+    tr:nth-child(even) {
+      background-color: #dddddd;
+    }*/
+
+</style>
+
+
+<style>
+    .button {
+        background-color: #4CAF50;
+        border: none;
+        color: white;
+        padding: 15px 25px;
+        text-align: center;
+        font-size: 16px;
+        cursor: pointer;
+        position: absolute;
+
+    }
+
+    .button:hover {
+        background-color: green;
+    }
+</style>
 <html>
 <head>
-    <style>
-        .accordion {
-            background-color: #eee;
-            border-left-width: 100px;
-            color: #444;
-            cursor: pointer;
-            padding: 18px;
-            width: 100%;
-            border: none;
-            text-align: center;
-            outline: none;
-            font-size: 15px;
-            transition: 0.4s;
-            /*right: 100px;
-            left:100px;*/
-        }
-
-        .active, .accordion:hover {
-            background-color: #ccc;
-        }
-
-        .panel {
-            text-align: center;
-            padding: 0 18px;
-            display: none;
-            background-color: white;
-            overflow: hidden;
-
-        }
-
-        /*
-        table {
-          font-family: arial, sans-serif;
-          border-collapse: collapse;
-          width: 100%;
-        }
-
-        td, th {
-          border: 1px solid #dddddd;
-          text-align: left;
-          padding: 8px;
-        }
-
-        tr:nth-child(even) {
-          background-color: #dddddd;
-        }*/
-
-    </style>
-
-
-    <style>
-        .button {
-            background-color: #4CAF50;
-            border: none;
-            color: white;
-            padding: 15px 25px;
-            text-align: center;
-            font-size: 16px;
-            cursor: pointer;
-            position: absolute;
-
-        }
-
-        .button:hover {
-            background-color: green;
-        }
-    </style>
     <title>TermInator</title>
     <link rel="stylesheet" href="/static/css/main.css" type="text/css" media="screen">
     <link rel="stylesheet" href="/static/css/grid.css" type="text/css" media="screen">
@@ -75,7 +75,7 @@
 
     <link rel="stylesheet" href="/static/css/summary.css" media="screen">
     <link rel="stylesheet" href="/static/css/jquery.modal.css" media="screen">
-    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
 </head>
 
 <body onload="group_number()">
@@ -87,7 +87,11 @@
         <div id="logo"></div>
     </div>
     <div id="content">
-
+{#                <div class="top">#}
+        {#                    <div class="top-right"></div>#}
+        {#                    <div class="top-left"></div>#}
+        {#                    <div class="top-center"></div>#}
+        {#                </div>#}
         <div class="center">
             <div id="rightbar">
                 <ul>
@@ -97,7 +101,7 @@
                     <li><a href="/schedule/">
                         <div class="tab-icon calendar-icon"></div>
                     </a></li>
-                    <li><a href="/graduation/"  class="active">
+                    <li><a href="/graduation/" class="active">
                         <div class="tab-icon list-icon"></div>
                     </a></li>
                 </ul>
@@ -121,6 +125,12 @@
 
         </div>
 
+{#                <div class="bottom">#}
+{#                    <div class="bottom-right"></div>#}
+{#                    <div class="bottom-left"></div>#}
+{#                    <div class="bottom-center"></div>#}
+{#                </div>#}
+
     </div>
     <div id="footer">
     </div>
@@ -136,20 +146,7 @@
 <script src="/static/js/jquery.modal.min.js" type="text/javascript"></script>
 <script src="/static/js/courseinfo.js" type="text/javascript"></script>
 <script src="/static/js/graduation.js"></script>
-<script type="text/javascript">
-    var _gaq = _gaq || [];
-    _gaq.push(['_setAccount', 'UA-28717546-1']);
-    _gaq.push(['_trackPageview']);
 
-    (function () {
-        var ga = document.createElement('script');
-        ga.type = 'text/javascript';
-        ga.async = true;
-        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-        var s = document.getElementsByTagName('script')[0];
-        s.parentNode.insertBefore(ga, s);
-    })();
-</script>
 
 </body>
 </html>
