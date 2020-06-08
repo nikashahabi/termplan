@@ -87,7 +87,7 @@ function add_course(groupId) {
             var courses = data.user_courses;
             for (i = 0; i < courses.length; i++) {
                 var check = "";
-                if (courses[i].is_Passed) {
+                if (courses[i].is_passed) {
                     check = "checked";
                 }
                 $("#course-group-" + groupId).append(sprintf('<li><input type="checkbox" name="chk" id="%s" %s>%s</input></li>', courses[i].id, check, courses[i].name));
