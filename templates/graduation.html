@@ -1,72 +1,72 @@
-
 <html>
 <head>
     <style>
-.accordion {
-  background-color: #eee;
-  border-left-width: 100px;
-  color: #444;
-  cursor: pointer;
-  padding: 18px;
-  width: 100%;
-  border: none;
-  text-align: center;
-  outline: none;
-  font-size: 15px;
-  transition: 0.4s;
-  /*right: 100px;
-  left:100px;*/
-}
+        .accordion {
+            background-color: #eee;
+            border-left-width: 100px;
+            color: #444;
+            cursor: pointer;
+            padding: 18px;
+            width: 100%;
+            border: none;
+            text-align: center;
+            outline: none;
+            font-size: 15px;
+            transition: 0.4s;
+            /*right: 100px;
+            left:100px;*/
+        }
 
-.active, .accordion:hover {
-  background-color: #ccc; 
-}
+        .active, .accordion:hover {
+            background-color: #ccc;
+        }
 
-.panel {
-  text-align: center;
-  padding: 0 18px;
-  display: none;
-  background-color: white;
-  overflow: hidden;
+        .panel {
+            text-align: center;
+            padding: 0 18px;
+            display: none;
+            background-color: white;
+            overflow: hidden;
 
-}
-/*
-table {
-  font-family: arial, sans-serif;
-  border-collapse: collapse;
-  width: 100%;
-}
+        }
 
-td, th {
-  border: 1px solid #dddddd;
-  text-align: left;
-  padding: 8px;
-}
+        /*
+        table {
+          font-family: arial, sans-serif;
+          border-collapse: collapse;
+          width: 100%;
+        }
 
-tr:nth-child(even) {
-  background-color: #dddddd;
-}*/
+        td, th {
+          border: 1px solid #dddddd;
+          text-align: left;
+          padding: 8px;
+        }
 
-</style>
+        tr:nth-child(even) {
+          background-color: #dddddd;
+        }*/
+
+    </style>
 
 
-<style>
-.button {
-  background-color: #4CAF50;
-  border: none;
-  color: white;
-  padding: 15px 25px;
-  text-align: center;
-  font-size: 16px;
-  cursor: pointer;
-  position: absolute;
-  
-}
+    <style>
+        .button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 15px 25px;
+            text-align: center;
+            font-size: 16px;
+            cursor: pointer;
+            position: absolute;
 
-.button:hover {
-  background-color: green;
-}
-</style>
+        }
+
+        .button:hover {
+            background-color: green;
+        }
+    </style>
     <title>TermInator</title>
     <link rel="stylesheet" href="/static/css/main.css" type="text/css" media="screen">
     <link rel="stylesheet" href="/static/css/grid.css" type="text/css" media="screen">
@@ -80,7 +80,7 @@ tr:nth-child(even) {
 
 <body onload="group_number()">
 <div id="wrapper">
-   <div id="header">
+    <div id="header">
         <div id="userinfo">
             {{ username }} / <a href="/logout/">خروج</a>
         </div>
@@ -94,22 +94,20 @@ tr:nth-child(even) {
                     <li><a href="/">
                         <div class="tab-icon home-icon"></div>
                     </a></li>
-                    <li><a href="/schedule/" class="active">
+                    <li><a href="/schedule/">
                         <div class="tab-icon calendar-icon"></div>
                     </a></li>
-                    <li><a href="/schedule/summary/">
+                    <li><a href="/graduation/"  class="active">
                         <div class="tab-icon list-icon"></div>
                     </a></li>
                 </ul>
             </div>
 
 
+            <div class="bottom-center" id="main-content-accordian">
 
 
-           <div class= "bottom-center" id="main-content-accordian">
-
-                
-                <button class ="button" onClick="submit_button()" >Submit</button>
+                <button class="button" onClick="submit_button()">Submit</button>
             </div>
             <div>
                 <table class="w3-table-all w3-card-4" id="remained-unit">
