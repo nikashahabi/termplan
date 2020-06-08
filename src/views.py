@@ -5,8 +5,12 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
 
-from src.excel_handler import handle_uploaded_semester_file, handle_uploaded_department_file
+from src.excel_handler import handle_uploaded_semester_file
 from src.models import SemesterCourse, User, UserSchedule, Department, Course, UserPassed, ChartTable
+
+
+def homepage(request):
+    return render(request, 'homepage.html')
 
 
 @csrf_exempt
