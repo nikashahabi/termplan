@@ -35,7 +35,7 @@ function group_number() {
     $.ajax({
         url: '/graduation',
         type: 'post',
-        data: JSON.stringify({group: "0", user: "temp"}),
+        data: JSON.stringify({group: "0", username: "temp"}),
         success: function (data) {
             group_numbers = data.group_count;
             
@@ -47,6 +47,8 @@ function group_number() {
 function show_remained(){
     $.ajax({
         url: '/remained_courses',
+        type:'post',
+        data: JSON.stringify({table_num:1, username: "temp"}),
         success: function(data){
         courses = data.remain;
         create_table(courses);
@@ -80,12 +82,12 @@ function add_course(groupId) {
     $.ajax({
         url: '/graduation',
         type: 'post',
-        data: JSON.stringify({group: groupId, user: "temp"}),
+        data: JSON.stringify({group: groupId, username: "temp"}),
         success: function (data) {
-            var courses = data.data;
+            var courses = data.user_courses;
             for (i = 0; i < courses.length; i++) {
                 var check = "";
-                if (courses[i].isPassed) {
+                if (courses[i].is_Passed) {
                     check = "checked";
                 }
                 $("#course-group-" + groupId).append(sprintf('<li><input type="checkbox" name="chk" id="%s" %s>%s</input></li>', courses[i].id, check, courses[i].name));

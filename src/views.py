@@ -104,7 +104,7 @@ def schedule(request):
 def graduation(request):
     if request.method == "POST":
         data = json.loads(request.body)
-        username = data.get("user")
+        username = data.get("username")
         table_no = data.get("group")
         user = User.objects.filter(username=username).first()
         department = user.department
@@ -116,8 +116,8 @@ def graduation(request):
         course_list = []
         for course in table_courses:
             course_list.append({
-                "course_id": course.code,
-                "course_name": course.name,
+                "id": course.code,
+                "name": course.name,
                 "is_passed": True if course in user_passed_courses.courses.all() else False
             })
         return JsonResponse({"user_courses": course_list})
