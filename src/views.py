@@ -111,7 +111,7 @@ def graduation(request):
         if table_no == "0":
             table_count = ChartTable.objects.filter(dep=department).count()
             return JsonResponse({"group_count": table_count})
-        user_passed_courses = UserPassed.objects.filter(user=user).first()
+        user_passed_courses = UserPassed.objects.filter(user=user,).first()
         print(user_passed_courses)
         table_courses = Course.objects.filter(table__code=table_no, department=user.department)
         print(table_courses)
@@ -151,18 +151,20 @@ def show_remained(request):
     user = User.objects.filter(username=username).first()
     department = user.department
     all_courses = Course.objects.filter(department=department, table=table_number)
-    user_passed_courses = UserPassed.objects.filter(user=user, courses__table__code=table_number).first()
+    user_passed_courses = UserPassed.objects.filter(user=user, courses__table__code=table_number)
     remained = []
     passed_unit = 0
     for course in all_courses:
-        if course.is_starred and course not in user_passed_courses.courses.all():
+        if course.is_starred and (
+                not user_passed_courses.exists() or course not in user_passed_courses.first().courses.all()):
             remained.append({"course_name": course.name,
                              "course_id": course.code,
                              "course_unit": course.unit,
                              "necessity": True})
-    for user_course in user_passed_courses.courses.all():
-        if not user_course.is_starred:
-            passed_unit += user_course.unit
+    if user_passed_courses.exists():
+        for user_course in user_passed_courses.first().courses.all():
+            if not user_course.is_starred:
+                passed_unit += user_course.unit
     chart = ChartTable.objects.filter(dep=department, code=table_number).first()
     optional_remained = chart.req_not_stared_units - passed_unit
     # chart_table = ChartTable.objects.filter(dep=department, code=table_number).first()
@@ -171,14 +173,14 @@ def show_remained(request):
     #         if not user_course.is_starred:
     #             remained.append({"course_name": user_course.course.department,
     #                              "necessity": False})
-    user_passed_courses = UserPassed.objects.filter(user=user, courses__table__code=table_number).first()
     table_courses = Course.objects.filter(table__code=table_number, department=department)
     course_list = []
     for course in table_courses:
         course_list.append({
             "course_id": course.code,
             "course_name": course.name,
-            "is_passed": True if course in user_passed_courses.courses.all() else False
+            "is_passed": True if user_passed_courses.exists() and course in user_passed_courses.first().courses.all()
+            else False
         })
     return JsonResponse({
         "username": username,
