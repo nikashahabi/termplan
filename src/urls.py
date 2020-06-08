@@ -14,6 +14,5 @@ urlpatterns = [
     re_path(r'^remained_courses/?$', show_remained),
     re_path(r'^upload_semester_file/?$', SemesterCourseAddView.as_view(), name='upload_file'),
     re_path(r'^upload_department_file/?$', DepartmentChartAddView.as_view(), name='upload_file')
-    re_path(r'^course_chart/', course_chart)
 
 ]
