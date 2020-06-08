@@ -130,11 +130,11 @@ def graduation(request):
 def add_passed_course(request):
     data = json.loads(request.body)
     username = data.get("username")
-    courses = data.get("courses")
+    courses = data.get("passed_courses")
     user = User.objects.filter(username=username).first()
     user_passed, _ = UserPassed.objects.get_or_create(user=user)
     for crs in courses:
-        course = Course.objects.filter(code=crs.get("code")).first()
+        course = Course.objects.filter(code=crs).first()
         if course not in user_passed.courses.all():
             user_passed.courses.add(course)
             passed_units = user_passed.units

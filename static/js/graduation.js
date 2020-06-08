@@ -21,9 +21,9 @@ function submit_button() {
         index++;
     });
     $.ajax({
-        url: '/passed_course',
+        url: '/add_passed_course',
         type: 'post',
-        data: JSON.stringify({passed_courses: courses}),
+        data: JSON.stringify({passed_courses: courses,username:"temp"}),
         success: function (data) {
 
         }
