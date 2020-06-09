@@ -13,7 +13,7 @@ function reply_click(clicked_id) {
     }
 }
 
-function submit_button() {
+function submit_button(tedad) {
     var courses = new Array();
     var index = 0;
     $("input:checkbox[name=chk]:checked").each(function () {
@@ -28,7 +28,10 @@ function submit_button() {
 
         }
     });
-
+    var ted = parseInt(tedad);
+    for(i = 0; i < tedad; i++){
+        show_remained(i + 1);
+    }
 }
 
 function group_number() {
@@ -72,7 +75,7 @@ function create_button(group_numbers) {
 
         $("#main-content-accordian").append(sprintf('<button class="accordion" id="%s" onClick="reply_click(this.id)">درس‌های گروه %s</button> <div class="panel"> <ul id="%s"> </ul> </div>', i + 1, i + 1, "course-group-" + (i + 1)));
     }
-    $("#main-content-accordian").append(sprintf('<button class="accordion" onClick="submit_button()">Submit</button>'));
+    $("#main-content-accordian").append(sprintf('<button class="accordion" onClick="submit_button(%s)">Submit</button>', tedad));
     //
     for(i = 0; i < tedad; i++){
         show_remained(i + 1);
