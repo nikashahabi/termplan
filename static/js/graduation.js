@@ -72,6 +72,8 @@ function create_button(group_numbers) {
 
         $("#main-content-accordian").append(sprintf('<button class="accordion" id="%s" onClick="reply_click(this.id)">درس‌های گروه %s</button> <div class="panel"> <ul id="%s"> </ul> </div>', i + 1, i + 1, "course-group-" + (i + 1)));
     }
+    $("#main-content-accordian").append(sprintf('<button class="accordion" onClick="submit_button()">Submit</button>'));
+    //
     for(i = 0; i < tedad; i++){
         show_remained(i + 1);
     }

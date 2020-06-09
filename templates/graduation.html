@@ -1,11 +1,28 @@
 <style>
+
+    table {
+      font-family: arial, sans-serif;
+      border-collapse: collapse;
+      width: 80%;
+    }
+
+    td, th {
+      border: 1px solid #dddddd;
+      text-align: left;
+      padding: 8px;
+    }
+
+    tr:nth-child(even) {
+      background-color: #dddddd;
+    }
+
     .accordion {
         background-color: #eee;
         border-left-width: 100px;
         color: #444;
         cursor: pointer;
         padding: 18px;
-        width: 100%;
+        width: 80%;
         border: none;
         text-align: center;
         outline: none;
@@ -19,9 +36,29 @@
         background-color: #ccc;
     }
 
+    .btn-group button {
+      background-color: #4CAF50; /* Green background */
+      border: 1px solid green; /* Green border */
+      color: white; /* White text */
+      padding: 10px 24px; /* Some padding */
+      cursor: pointer; /* Pointer/hand icon */
+      width: 80%; /* Set a width if needed */
+      display: block; /* Make the buttons appear below each other */
+    }
+
+    .btn-group button:not(:last-child) {
+      border-bottom: none; /* Prevent double borders */
+    }
+
+    /* Add a background color on hover */
+    .btn-group button:hover {
+      background-color: #3e8e41;
+    }
+
     .panel {
         text-align: center;
         padding: 0 18px;
+        width: 76%;
         display: none;
         background-color: white;
         overflow: hidden;
@@ -108,10 +145,8 @@
             </div>
 
 
-            <div class="bottom-center" id="main-content-accordian">
+            <div class="btn-group" id="main-content-accordian">
 
-
-                <button class="button" onClick="submit_button()">Submit</button>
             </div>
             <div>
                 <table class="w3-table-all w3-card-4" id="remained-unit">
