@@ -42,13 +42,14 @@ function group_number() {
             create_button(group_numbers);
         },
     });
-    show_remained();
+    
 }
-function show_remained(){
+function show_remained(index){
+    var ind = parseInt(index);
     $.ajax({
         url: '/remained_courses',
         type:'post',
-        data: JSON.stringify({table_num:1, username: "temp"}),
+        data: JSON.stringify({table_num: ind, username: "temp"}),
         success: function(data){
         courses = data.remain;
         create_table(courses);
@@ -70,6 +71,9 @@ function create_button(group_numbers) {
     for (i = 0; i < tedad; i++) {
 
         $("#main-content-accordian").append(sprintf('<button class="accordion" id="%s" onClick="reply_click(this.id)">درس‌های گروه %s</button> <div class="panel"> <ul id="%s"> </ul> </div>', i + 1, i + 1, "course-group-" + (i + 1)));
+    }
+    for(i = 0; i < tedad; i++){
+        show_remained(i + 1);
     }
 }
 
