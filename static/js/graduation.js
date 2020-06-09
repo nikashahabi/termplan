@@ -1,5 +1,6 @@
 var get_courses = new Array();
-
+var table_keshidam = false;
+var tedad_goroha = 0;
 function reply_click(clicked_id) {
 
     var button = document.getElementById(clicked_id);
@@ -55,27 +56,38 @@ function show_remained(index){
         data: JSON.stringify({table_num: ind, username: "temp"}),
         success: function(data){
         courses = data.remain;
-        create_table(courses);
+        optional_remained = data.optional_remained;
+        create_table(courses, ind, optional_remained);
         
         },
     });
 }
-function create_table(courses){
+function create_table(courses, index, opt){
+    if(!table_keshidam){
+        for(i = 0; i < tedad_goroha; i++){
+            $("#tablee").append(sprintf('<table class="w3-table-all w3-card-4" id="remained-unit-%s">  <caption> درس های گروه %s</caption><tr><th>نام درس</th><th>تعداد واحد</th><th>اجباری</th></tr></table>', i + 1, i + 1));
+        }
+        table_keshidam = true;
+    }
+    var ind = parseInt(index);
     for (i = 0; i < courses.length; i++){
         var necessity = "نیست";
         if(courses[i].necessity)
             necessity = "هست";
-        $("#remained-unit").append(sprintf('<tr><th>%s</th><th>%s</th><th>%s</th></tr>', courses[i].course_name , courses[i].course_unit, necessity));
+        $("#remained-unit-" + (ind+1)).append(sprintf('<tr><th>%s</th><th>%s</th><th>%s</th></tr>', courses[i].course_name , courses[i].course_unit, necessity));
     }
+    $("#remained-unit-" + (ind+1)).append(sprintf('<tr><th>درس اختیاری</th><th>%s</th><th>هست</th></tr>', opt));
+
 }
 function create_button(group_numbers) {
     
     var tedad = parseInt(group_numbers);
+    tedad_goroha = tedad;
     for (i = 0; i < tedad; i++) {
 
         $("#main-content-accordian").append(sprintf('<button class="accordion" id="%s" onClick="reply_click(this.id)">درس‌های گروه %s</button> <div class="panel"> <ul id="%s"> </ul> </div>', i + 1, i + 1, "course-group-" + (i + 1)));
     }
-    $("#main-content-accordian").append(sprintf('<button class="accordion" onClick="submit_button(%s)">Submit</button>', tedad));
+    $("#main-content-accordian").append(sprintf('<button class="submit-btn" onClick="submit_button(%s)">Submit</button>', tedad));
     //
     for(i = 0; i < tedad; i++){
         show_remained(i + 1);
