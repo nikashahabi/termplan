@@ -1,12 +1,15 @@
 import json
 
+from django.contrib.auth import authenticate
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
 
 from src.excel_handler import handle_uploaded_semester_file
 from src.models import SemesterCourse, User, UserSchedule, Department, Course, UserPassed, ChartTable
+
+from src.forms import SignUpForm
 
 
 def homepage(request):
@@ -214,3 +217,32 @@ class DepartmentChartAddView(APIView):
 
     def get(self, request):
         return render(request, 'department_chart_add.html', {"message": "فایل را ارسال کنید"})
+
+
+@csrf_exempt
+def login(request):
+    if request.method == 'GET':
+        return render(request, 'auth/../templates/login.html')
+    elif request.method == 'POST':
+        user_name = request.POST.get('username')
+        pass_word = request.POST.get('password')
+        user = auth.authenticate(username=user_name, password=pass_word)
+        if user is None:
+            return JsonResponse({'Error': 'Wrong user name or password'})
+        else:
+            auth.login(request, user)
+            return JsonResponse({"text": "good"})
+
+
+def signup(request):
+    form = SignUpForm(request.POST)
+    if form.is_valid():
+        form.save()
+        username = form.cleaned_data.get('username')
+        password = form.cleaned_data.get('password1')
+        user = authenticate(username=username, password=password)
+        login(request, user)
+        return redirect('home')
+    else:
+        form = SignUpForm()
+    return render(request, 'signup.html', {'form': form})
