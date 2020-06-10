@@ -120,6 +120,7 @@ def graduation(request):
             course_list.append({
                 "id": course.code,
                 "name": course.name,
+                "is_starred": course.is_starred,
                 "is_passed": True if course in user_passed_courses.courses.all() else False
             })
         return JsonResponse({"user_courses": course_list})
