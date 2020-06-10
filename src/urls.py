@@ -16,6 +16,6 @@ urlpatterns = [
     re_path(r'^upload_department_file/?$', DepartmentChartAddView.as_view(), name='upload_file'),
     path('login', login),
     path('signup', signup),
-    path('', homepage),
+    path('', homepage, name='home'),
 
 ]

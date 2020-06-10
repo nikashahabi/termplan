@@ -5,8 +5,12 @@ from django.contrib.auth.forms import UserCreationForm
 
 class SignUpForm(UserCreationForm):
     username = forms.CharField(max_length=30)
-    email = forms.EmailField(max_length=200)
+    choices = (('ریاضی', 'ریاضی'), ('علوم کامپیوتر', 'علوم کامپیوتر'),)
+    field = forms.ChoiceField(choices=choices)
 
     class Meta:
         model = User
-        fields = ('username', 'department', 'password1', 'password2')
+        fields = ('username', 'department', 'password',)
+        widgets = {
+            'password': forms.PasswordInput()
+        }

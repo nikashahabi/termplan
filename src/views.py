@@ -1,5 +1,6 @@
 import json
 
+from django.contrib import auth
 from django.contrib.auth import authenticate
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
@@ -222,7 +223,7 @@ class DepartmentChartAddView(APIView):
 @csrf_exempt
 def login(request):
     if request.method == 'GET':
-        return render(request, 'auth/../templates/login.html')
+        return render(request, 'terminator/templates/login.html')
     elif request.method == 'POST':
         user_name = request.POST.get('username')
         pass_word = request.POST.get('password')
@@ -239,7 +240,7 @@ def signup(request):
     if form.is_valid():
         form.save()
         username = form.cleaned_data.get('username')
-        password = form.cleaned_data.get('password1')
+        password = form.cleaned_data.get('password')
         user = authenticate(username=username, password=password)
         login(request, user)
         return redirect('home')
