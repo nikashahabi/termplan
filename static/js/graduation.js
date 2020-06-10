@@ -15,7 +15,7 @@ function reply_click(clicked_id) {
 }
 
 function submit_button(tedad) {
-
+    
     var courses = new Array();
     var index = 0;
     $("input:checkbox[name=chk]:checked").each(function () {
@@ -27,9 +27,12 @@ function submit_button(tedad) {
         type: 'post',
         data: JSON.stringify({passed_courses: courses,username:"temp"}),
         success: function (data) {
-
+            show_remained_table(tedad);
         }
     });
+    
+}
+function show_remained_table(tedad){
     var ted = parseInt(tedad);
     for(i = 0; i < tedad; i++){
         var tb = document.getElementById("remained-unit-" + (i + 1));
@@ -37,11 +40,12 @@ function submit_button(tedad) {
             tb.deleteRow(1);
         }
     }
+    
+
     for(i = 0; i < tedad; i++){
-        show_remained(i + 1);
+        show_remained(i);
     }
 }
-
 function group_number() {
     $.ajax({
         url: '/graduation',
@@ -60,7 +64,7 @@ function show_remained(index){
     $.ajax({
         url: '/remained_courses',
         type:'post',
-        data: JSON.stringify({table_num: ind, username: "temp"}),
+        data: JSON.stringify({table_num: ind + 1, username: "temp"}),
         success: function(data){
         courses = data.remain;
         optional_remained = data.optional_remained;
@@ -82,6 +86,7 @@ function create_table(courses, index, opt){
     var ind = parseInt(index);
     
     for (i = 0; i < courses.length; i++){
+        
         var necessity = "نیست";
         if(courses[i].necessity)
             necessity = "هست";
@@ -101,7 +106,7 @@ function create_button(group_numbers) {
     $("#main-content-accordian").append(sprintf('<button class="submit-btn" onClick="submit_button(%s)">Submit</button>', tedad));
     //
     for(i = 0; i < tedad; i++){
-        show_remained(i + 1);
+        show_remained(i);
     }
 }
 
