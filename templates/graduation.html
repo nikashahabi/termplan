@@ -1,25 +1,27 @@
 <style>
 
     table {
-      font-family: arial, sans-serif;
-      border-collapse: collapse;
-      width: 100%;
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
         margin: auto;
     }
 
     td, th {
-      border: 1px solid #dddddd;
-      text-align: left;
-      padding: 8px;
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
     }
 
     tr:nth-child(even) {
-      background-color: #dddddd;
+        background-color: #dddddd;
     }
-    .center{
+
+    .cntr {
         margin: auto;
         width: 70%;
     }
+
     .accordion {
         background-color: #eee;
         border-left-width: 100px;
@@ -61,26 +63,25 @@
     }
 
 
-
     .btn-group button {
         margin: auto;
-      background-color: #4CAF50; /* Green background */
-      border: 1px solid green; /* Green border */
-      color: white; /* White text */
-      padding: 10px 24px; /* Some padding */
-      cursor: pointer; /* Pointer/hand icon */
-      width: 80%; /* Set a width if needed */
-      display: block; /* Make the buttons appear below each other */
+        background-color: #4CAF50; /* Green background */
+        border: 1px solid green; /* Green border */
+        color: white; /* White text */
+        padding: 10px 24px; /* Some padding */
+        cursor: pointer; /* Pointer/hand icon */
+        width: 80%; /* Set a width if needed */
+        display: block; /* Make the buttons appear below each other */
     }
 
 
     .btn-group button:not(:last-child) {
-      border-bottom: none; /* Prevent double borders */
+        border-bottom: none; /* Prevent double borders */
     }
 
     /* Add a background color on hover */
     .btn-group button:hover {
-      background-color: #3e8e41;
+        background-color: #3e8e41;
     }
 
     .panel {
@@ -152,12 +153,12 @@
         <div id="logo"></div>
     </div>
     <div id="content">
-{#                <div class="top">#}
-        {#                    <div class="top-right"></div>#}
-        {#                    <div class="top-left"></div>#}
-        {#                    <div class="top-center"></div>#}
-        {#                </div>#}
-        <div>
+        <div class="top">
+            <div class="top-right"></div>
+            <div class="top-left"></div>
+            <div class="top-center"></div>
+        </div>
+        <div class="center">
             <div id="rightbar">
                 <ul>
                     <li><a href="/">
@@ -176,7 +177,7 @@
                 <div class="btn-group" id="main-content-accordian">
 
                 </div>
-                <div id="tablee" class="center">
+                <div id="tablee" class="cntr">
 
                 </div>
 
@@ -184,11 +185,11 @@
 
         </div>
 
-{#                <div class="bottom">#}
-{#                    <div class="bottom-right"></div>#}
-{#                    <div class="bottom-left"></div>#}
-{#                    <div class="bottom-center"></div>#}
-{#                </div>#}
+        <div class="bottom">
+            <div class="bottom-right"></div>
+            <div class="bottom-left"></div>
+            <div class="bottom-center"></div>
+        </div>
 
     </div>
     <div id="footer">
