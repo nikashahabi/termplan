@@ -2,7 +2,7 @@ import json
 
 from django.contrib import auth
 from django.contrib.auth import authenticate
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
@@ -11,6 +11,8 @@ from src.excel_handler import handle_uploaded_semester_file
 from src.models import SemesterCourse, User, UserSchedule, Department, Course, UserPassed, ChartTable
 
 from src.forms import SignUpForm
+
+from terminator.src.forms import LoginForm
 
 
 def homepage(request):
@@ -222,17 +224,36 @@ class DepartmentChartAddView(APIView):
 
 @csrf_exempt
 def login(request):
-    if request.method == 'GET':
-        return render(request, 'terminator/templates/login.html')
-    elif request.method == 'POST':
-        user_name = request.POST.get('username')
-        pass_word = request.POST.get('password')
-        user = auth.authenticate(username=user_name, password=pass_word)
-        if user is None:
-            return JsonResponse({'Error': 'Wrong user name or password'})
+    # if request.method == 'GET':
+    #     return render(request, 'terminator/templates/login.html')
+    # elif request.method == 'POST':
+    #     user_name = request.POST.get('username')
+    #     pass_word = request.POST.get('password')
+    #     user = auth.authenticate(username=user_name, password=pass_word)
+    #     if user is None:
+    #         return JsonResponse({'Error': 'Wrong user name or password'})
+    #     else:
+    #         auth.login(request, user)
+    #         return JsonResponse({"text": "good"})
+    user_name = request.POST.get('username', None)
+    password = request.POST.get('password', None)
+
+    if user_name is None or password is None:
+        login_form = LoginForm()
+        message = ""
+    else:
+        user = authenticate(username=user_name, password=password)
+        if user is not None:
+            login(request, user)
+            return HttpResponseRedirect("/")
         else:
-            auth.login(request, user)
-            return JsonResponse({"text": "good"})
+            message = 'نام کاربری یا رمز عبور اشتباه است!'
+            login_form = LoginForm(request.POST)
+
+    return render(request, "sign_in.html", {
+        'message': message,
+        'login_form': login_form
+    })
 
 
 def signup(request):
