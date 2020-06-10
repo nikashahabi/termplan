@@ -3,8 +3,14 @@ import json
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.views import APIView
 
-from src.models import SemesterCourse, User, UserCourse, Department
+from src.excel_handler import handle_uploaded_semester_file
+from src.models import SemesterCourse, User, UserSchedule, Department, Course, UserPassed, ChartTable
+
+
+def homepage(request):
+    return render(request, 'homepage.html')
 
 
 @csrf_exempt
@@ -50,7 +56,7 @@ def add_course(request):
     semester = data.get("semester")
     selected_course = SemesterCourse.objects.filter(course__code=course_code, group=course_group,
                                                     semester=semester).first()
-    user_semester, _ = UserCourse.objects.get_or_create(user=user, semester=semester)
+    user_semester, _ = UserSchedule.objects.get_or_create(user=user, semester=semester)
     # overlapping_course = user_semester.courses.filter(Q(day1=wanted_course.day1) | Q(day2=wanted_course.day2), Q(
     #     start_time__range=(wanted_course.start_time, wanted_course.end_time)) | Q(
     #     end_time__range=(wanted_course.start_time, wanted_course.end_time))).exclude(
@@ -74,7 +80,7 @@ def delete_course(request):
     course_code, course_group = course_id.split("-")
     selected_course = SemesterCourse.objects.filter(course__code=course_code, group=course_group,
                                                     semester=semester).first()
-    user_semester, _ = UserCourse.objects.get_or_create(user=user, semester=semester)
+    user_semester, _ = UserSchedule.objects.get_or_create(user=user, semester=semester)
     if selected_course in user_semester.courses.all():
         user_semester.courses.remove(selected_course)
         return JsonResponse({"message": "با موفقیت حذف شد"})
@@ -92,3 +98,119 @@ def schedule(request):
         "departments": departments
     }
     return render(request, 'grid.html', data)
+
+
+@csrf_exempt
+def graduation(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        username = data.get("username")
+        table_no = data.get("group")
+        user = User.objects.filter(username=username).first()
+        department = user.department
+        if table_no == "0":
+            table_count = ChartTable.objects.filter(dep=department).count()
+            return JsonResponse({"group_count": table_count})
+        user_passed_courses = UserPassed.objects.filter(user=user, ).first()
+        print(user_passed_courses)
+        table_courses = Course.objects.filter(table__code=table_no, department=user.department)
+        print(table_courses)
+        course_list = []
+        for course in table_courses:
+            course_list.append({
+                "id": course.code,
+                "name": course.name,
+                "is_starred": course.is_starred,
+                "is_passed": True if course in user_passed_courses.courses.all() else False
+            })
+        return JsonResponse({"user_courses": course_list})
+    return render(request, 'graduation.html')
+
+
+@csrf_exempt
+def add_passed_course(request):
+    data = json.loads(request.body)
+    username = data.get("username")
+    courses = data.get("passed_courses")
+    user = User.objects.filter(username=username).first()
+    if_exist = UserPassed.objects.filter(user=user).count()
+    if if_exist:
+        UserPassed.objects.filter(user=user).delete()
+    user_passed, _ = UserPassed.objects.get_or_create(user=user)
+    for crs in courses:
+        course = Course.objects.filter(code=crs).first()
+        if course not in user_passed.courses.all():
+            user_passed.courses.add(course)
+            passed_units = user_passed.units
+            user_passed.units = passed_units + course.unit
+            user_passed.save()
+    return JsonResponse({})
+
+
+@csrf_exempt
+def show_remained(request):
+    data = json.loads(request.body)
+    username = data.get("username")
+    table_number = data.get("table_num")
+    user = User.objects.filter(username=username).first()
+    department = user.department
+    all_courses = Course.objects.filter(department=department, table=table_number)
+    user_passed_courses = UserPassed.objects.filter(user=user, courses__table__code=table_number)
+    remained = []
+    passed_unit = 0
+    for course in all_courses:
+        if course.is_starred and (
+                not user_passed_courses.exists() or course not in user_passed_courses.first().courses.all()):
+            remained.append({"course_name": course.name,
+                             "course_id": course.code,
+                             "course_unit": course.unit,
+                             "necessity": True})
+    if user_passed_courses.exists():
+        for user_course in user_passed_courses.first().courses.all():
+            if not user_course.is_starred:
+                passed_unit += user_course.unit
+    chart = ChartTable.objects.filter(dep=department, code=table_number).first()
+    optional_remained = chart.req_not_stared_units - passed_unit
+    # chart_table = ChartTable.objects.filter(dep=department, code=table_number).first()
+    # if passed_unit <= chart_table.req_passed_units:
+    #     for user_course in user_passed_courses.courses.all():
+    #         if not user_course.is_starred:
+    #             remained.append({"course_name": user_course.course.department,
+    #                              "necessity": False})
+    table_courses = Course.objects.filter(table__code=table_number, department=department)
+    course_list = []
+    for course in table_courses:
+        course_list.append({
+            "course_id": course.code,
+            "course_name": course.name,
+            "is_passed": True if user_passed_courses.exists() and course in user_passed_courses.first().courses.all()
+            else False
+        })
+    all_passed = UserPassed.objects.filter(user=user).first().units
+    return JsonResponse({
+        "username": username,
+        "remain": remained,
+        "optional_remained": optional_remained if optional_remained > 0 else 0,
+        "chart_course": course_list,
+        "all_passed": all_passed
+    })
+
+
+class SemesterCourseAddView(APIView):
+
+    def post(self, request):
+        success = handle_uploaded_semester_file(request.FILES['semester_file'])
+        return render(request, 'semester_course_add.html', {"success": success})
+
+    def get(self, request):
+        return render(request, 'semester_course_add.html', {"message": "فایل را ارسال کنید"})
+
+
+class DepartmentChartAddView(APIView):
+
+    def post(self, request):
+        success = handle_uploaded_semester_file(request.FILES['department_file'])
+        return render(request, 'department_chart_add.html', {"success": success})
+
+    def get(self, request):
+        return render(request, 'department_chart_add.html', {"message": "فایل را ارسال کنید"})

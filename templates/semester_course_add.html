@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+          integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <meta charset="UTF-8">
+    <title>file_upload</title>
+</head>
+<body>
+<form action="{% url 'src:upload_file' %}" method="POST"
+      enctype="multipart/form-data">
+    <div class="form-settings notes-form">
+        {% csrf_token %}
+        {#        <input type="file" name="semester_file">#}
+        <div class="input-group mb-3 col-md-4">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroupFileAddon01">Upload</span>
+            </div>
+            <div class="custom-file">
+                <input type="file" class="custom-file-input" id="semester_file" name="semester_file"
+                       aria-describedby="inputGroupFileAddon01">
+                <span class="custom-file-label">Choose file</span>
+            </div>
+        </div>
+        {#        <label class="file col-md-4">#}
+        {#            <input type="file" name="semester_file" class="custom-file-input"#}
+        {#                   id="semester_file"#}
+        {#                   aria-label="File browser example" required/>#}
+        {#            <span class="file-custom">#}
+        {#                                    </span>#}
+        {#        </label>#}
+
+
+        <button id="invite-tutor-btn" class="btn btn-primary margin-top col-md-1 "
+                data-loading-text="Loading..." type="submit">Save
+
+        </button>
+        {% if message %}
+            <div>{{ message }}</div>
+        {% endif %}
+        {% if success %}
+            <div style="color: darkgreen">فایل با موفقیت ارسال شد</div>
+            <div>برای ارسال دوباره فایل را انتخاب کنید</div>
+        {% elif success is False %}
+            <div style="color: red">اشتباهی رخ داد</div>
+            <div>برای ارسال دوباره فایل را انتخاب کنید</div>
+        {% endif %}
+
+
+    </div>
+</form>
+
+</body>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+
+
+<script>
+    $("body").on("change", '.custom-file-input', function () {
+        console.log("changed");
+        var fileName = $(this).val().split("\\").pop();
+        $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+    });
+
+</script>
+</html>
