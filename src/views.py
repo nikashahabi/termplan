@@ -186,11 +186,13 @@ def show_remained(request):
             "is_passed": True if user_passed_courses.exists() and course in user_passed_courses.first().courses.all()
             else False
         })
+    all_passed = UserPassed.objects.filter(user=user).first().units
     return JsonResponse({
         "username": username,
         "remain": remained,
         "optional_remained": optional_remained if optional_remained > 0 else 0,
-        "chart_course": course_list
+        "chart_course": course_list,
+        "all_passed": all_passed
     })
 
 
