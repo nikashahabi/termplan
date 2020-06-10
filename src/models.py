@@ -42,7 +42,7 @@ class Course(models.Model):
     is_starred = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"course:{self.name} - dep:{self.department}"
+        return f"dep:{self.department} - name:{self.name} - code:{self.code}"
 
 
 class SemesterCourse(models.Model):
@@ -61,7 +61,7 @@ class SemesterCourse(models.Model):
     capacity = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
-        return f"course:{self.course.name} - semester:{self.semester}"
+        return f"course:{self.course.name}"
 
 
 class UserSchedule(models.Model):
