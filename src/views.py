@@ -133,9 +133,9 @@ def add_passed_course(request):
     username = data.get("username")
     courses = data.get("passed_courses")
     user = User.objects.filter(username=username).first()
-    if_exist = SemesterCourse.objects.filter(user=user).count()
+    if_exist = UserPassed.objects.filter(user=user).count()
     if if_exist:
-        SemesterCourse.objects.filter(user=user).delete()
+        UserPassed.objects.filter(user=user).delete()
     user_passed, _ = UserPassed.objects.get_or_create(user=user)
     for crs in courses:
         course = Course.objects.filter(code=crs).first()
