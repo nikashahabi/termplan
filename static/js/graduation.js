@@ -15,6 +15,7 @@ function reply_click(clicked_id) {
 }
 
 function submit_button(tedad) {
+
     var courses = new Array();
     var index = 0;
     $("input:checkbox[name=chk]:checked").each(function () {
@@ -30,6 +31,12 @@ function submit_button(tedad) {
         }
     });
     var ted = parseInt(tedad);
+    for(i = 0; i < tedad; i++){
+        var tb = document.getElementById("remained-unit-" + (i + 1));
+        while(tb.rows.length > 1) {
+            tb.deleteRow(1);
+        }
+    }
     for(i = 0; i < tedad; i++){
         show_remained(i + 1);
     }
@@ -63,13 +70,17 @@ function show_remained(index){
     });
 }
 function create_table(courses, index, opt){
+    
     if(!table_keshidam){
         for(i = 0; i < tedad_goroha; i++){
             $("#tablee").append(sprintf('<table class="w3-table-all w3-card-4" id="remained-unit-%s">  <caption> درس های گروه %s</caption><tr><th>نام درس</th><th>تعداد واحد</th><th>اجباری</th></tr></table>', i + 1, i + 1));
         }
         table_keshidam = true;
     }
+    
+    
     var ind = parseInt(index);
+    
     for (i = 0; i < courses.length; i++){
         var necessity = "نیست";
         if(courses[i].necessity)
