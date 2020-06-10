@@ -1,0 +1,38 @@
+{% load static %}
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>ترم پلن</title>
+    <link href="{% static "css/bootstrap.min.css" %}" rel="stylesheet">
+    <link href="{% static "css/bootstrap.css" %}" rel="stylesheet">
+    <link href="{% static "css/panel.css" %}" rel="stylesheet">
+
+</head>
+
+<body dir="rtl">
+<div class="container">
+    <div class="row" style="margin-top: 50px">
+        <div class="col-md-12">
+            <h2 style="text-align: center; color: black">به ترم پلن خوش آمدید</h2>
+            <h4 style="text-align: center;" class="text-error">{{ message }}</h4>
+        </div>
+        <div class="col-md-4"></div>
+        <div class="col-md-4">
+            <form class="sign_form" method="post" action="/portal/login/">
+                {{ form.non_field_errors }}
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="username">نام کاربری</label>
+                    {{ login_form.username }}</div>
+                <div class="form-group">
+                    <label for="username">رمز عبور</label>
+                    {{ login_form.password }}</div>
+
+                <button type="submit" class="btn btn-success">ورود</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
