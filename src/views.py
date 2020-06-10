@@ -56,6 +56,9 @@ def add_course(request):
     semester = data.get("semester")
     selected_course = SemesterCourse.objects.filter(course__code=course_code, group=course_group,
                                                     semester=semester).first()
+    if_exist = SemesterCourse.objects.filter(user=user, semester=semester).count()
+    if if_exist:
+        SemesterCourse.objects.filter(user=user, semester=semester).delete()
     user_semester, _ = UserSchedule.objects.get_or_create(user=user, semester=semester)
     # overlapping_course = user_semester.courses.filter(Q(day1=wanted_course.day1) | Q(day2=wanted_course.day2), Q(
     #     start_time__range=(wanted_course.start_time, wanted_course.end_time)) | Q(
