@@ -244,7 +244,7 @@ def show_remained(request):
     })
 
 
-@login_required(login_url='/login/')
+
 class SemesterCourseAddView(APIView):
 
     def post(self, request):
@@ -255,7 +255,6 @@ class SemesterCourseAddView(APIView):
         return render(request, 'semester_course_add.html', {"message": "فایل را ارسال کنید"})
 
 
-@login_required(login_url='/login/')
 class DepartmentChartAddView(APIView):
 
     def post(self, request):
