@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 
 from src.excel_handler import handle_uploaded_semester_file
 from src.forms import LoginForm
-from src.models import SemesterCourse, User, UserSchedule, Department, Course, UserPassed, ChartTable
+from src.models import SemesterCourse, UserSchedule, Department, Course, UserPassed, ChartTable, User
 
 
 def log_out(req):
@@ -140,11 +140,12 @@ def delete_course(request):
 
 @login_required(login_url='/login/')
 def schedule(request):
+    user = request.user
     departments = []
     for dep in Department.objects.all():
         departments.append({"name": dep.name, "id": dep.id})
     data = {
-        "username": request.user.username,
+        "username": user.username,
         "departments": departments
     }
     return render(request, 'grid.html', data)
@@ -157,13 +158,14 @@ def graduation(request):
         data = json.loads(request.body)
         table_no = data.get("group")
         user = request.user
-        department = user.department
+        department = User.objects.filter(username=user.username).first().department
+        print(department)
         if table_no == "0":
             table_count = ChartTable.objects.filter(dep=department).count()
             return JsonResponse({"group_count": table_count})
-        user_passed_courses = UserPassed.objects.filter(user=user, ).first()
+        user_passed_courses = UserPassed.objects.filter(user=user).first()
         print(user_passed_courses)
-        table_courses = Course.objects.filter(table__code=table_no, department=user.department)
+        table_courses = Course.objects.filter(table__code=table_no, department=department)
         print(table_courses)
         course_list = []
         for course in table_courses:
@@ -201,7 +203,7 @@ def show_remained(request):
     data = json.loads(request.body)
     table_number = data.get("table_num")
     user = request.user
-    department = user.department
+    department = User.objects.filter(username=user.username).first().department
     all_courses = Course.objects.filter(department=department, table=table_number)
     user_passed_courses = UserPassed.objects.filter(user=user, courses__table__code=table_number)
     remained = []
@@ -219,12 +221,6 @@ def show_remained(request):
                 passed_unit += user_course.unit
     chart = ChartTable.objects.filter(dep=department, code=table_number).first()
     optional_remained = chart.req_not_stared_units - passed_unit
-    # chart_table = ChartTable.objects.filter(dep=department, code=table_number).first()
-    # if passed_unit <= chart_table.req_passed_units:
-    #     for user_course in user_passed_courses.courses.all():
-    #         if not user_course.is_starred:
-    #             remained.append({"course_name": user_course.course.department,
-    #                              "necessity": False})
     table_courses = Course.objects.filter(table__code=table_number, department=department)
     course_list = []
     for course in table_courses:
@@ -234,15 +230,14 @@ def show_remained(request):
             "is_passed": True if user_passed_courses.exists() and course in user_passed_courses.first().courses.all()
             else False
         })
-    all_passed = UserPassed.objects.filter(user=user).first().units
+    all_passed = UserPassed.objects.filter(user=user).first()
     return JsonResponse({
         "username": user.username,
         "remain": remained,
         "optional_remained": optional_remained if optional_remained > 0 else 0,
         "chart_course": course_list,
-        "all_passed": all_passed
+        "all_passed": all_passed.units if all_passed else 0
     })
-
 
 
 class SemesterCourseAddView(APIView):
