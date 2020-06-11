@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 
 
 class SignUpForm(UserCreationForm):
-    username = forms.CharField(max_length=30)
+    username = forms.CharField(max_length=30, id='username')
     choices = (('ریاضی', 'ریاضی'), ('علوم کامپیوتر', 'علوم کامپیوتر'),)
     field = forms.ChoiceField(choices=choices)
 

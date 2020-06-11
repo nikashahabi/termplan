@@ -1,7 +1,7 @@
 import json
 
 from django.contrib import auth
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, login
 from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
@@ -223,48 +223,43 @@ class DepartmentChartAddView(APIView):
 
 
 @csrf_exempt
-def login(request):
-    # if request.method == 'GET':
-    #     return render(request, 'terminator/templates/login.html')
-    # elif request.method == 'POST':
-    #     user_name = request.POST.get('username')
-    #     pass_word = request.POST.get('password')
-    #     user = auth.authenticate(username=user_name, password=pass_word)
-    #     if user is None:
-    #         return JsonResponse({'Error': 'Wrong user name or password'})
-    #     else:
-    #         auth.login(request, user)
-    #         return JsonResponse({"text": "good"})
+def log_in(request):
     user_name = request.POST.get('username', None)
-    password = request.POST.get('password', None)
-
-    if user_name is None or password is None:
+    pass_word = request.POST.get('password', None)
+    print(user_name)
+    print(pass_word)
+    if user_name is None or pass_word is None:
         login_form = LoginForm()
         message = ""
+        print("empty")
     else:
-        user = authenticate(username=user_name, password=password)
+        user = auth.authenticate(username=user_name, password=pass_word)
         if user is not None:
+            print("user is not none")
             login(request, user)
-            return HttpResponseRedirect("/")
+            return redirect('src:home')
         else:
+            print("wrong")
             message = 'نام کاربری یا رمز عبور اشتباه است!'
             login_form = LoginForm(request.POST)
 
-    return render(request, "sign_in.html", {
+    return render(request, "login.html", {
         'message': message,
         'login_form': login_form
     })
 
 
-def signup(request):
-    form = SignUpForm(request.POST)
+def sign_up(request):
+    form = LoginForm(request.POST)
     if form.is_valid():
-        form.save()
+        user = form.save()
+        user.set_password(user.password)
+        user.save()
         username = form.cleaned_data.get('username')
         password = form.cleaned_data.get('password')
         user = authenticate(username=username, password=password)
         login(request, user)
-        return redirect('home')
+        return redirect('src:home')
     else:
-        form = SignUpForm()
-    return render(request, 'signup.html', {'form': form})
+        form = LoginForm()
+    return render(request, 'login.html', {'login_form': form})
