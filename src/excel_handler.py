@@ -57,9 +57,9 @@ def handle_uploaded_semester_file(f):
     return success
 
 
-def handle_uploaded_department_file(f):
-    course = xlrd.open_workbook(file_contents=f.read())
-    for sheet in course.sheets():
+def handle_uploaded_chart_table_file(f):
+    table = xlrd.open_workbook(file_contents=f.read())
+    for sheet in table.sheets():
         try:
             number_of_rows = sheet.nrows
             for row in range(1, number_of_rows):
@@ -69,16 +69,14 @@ def handle_uploaded_department_file(f):
                 req_passed_units = sheet.cell(row, 3).value
                 req_not_stared_units = sheet.cell(row, 4).value
                 info = sheet.cell(row, 5).value
-
-                dep = Department.objects.filter(name=dep).first()
-                course = Course.objects.filter(code=code).first()
-                if ChartTable.objects.filter(course=course).exists():
-                    chart_table = ChartTable.objects.filter(course=course).update(name=name,
-                                                                                  code=code,
-                                                                                  dep=dep,
-                                                                                  req_passed_units=req_passed_units,
-                                                                                  req_not_stared_units=req_not_stared_units,
-                                                                                  info=info)
+                dep, _ = Department.objects.get_or_create(name=name)
+                if ChartTable.objects.filter(code=code).exists():
+                    chart_table = ChartTable.objects.filter(code=code).update(name=name,
+                                                                              code=code,
+                                                                              dep=dep,
+                                                                              req_passed_units=req_passed_units,
+                                                                              req_not_stared_units=req_not_stared_units,
+                                                                              info=info)
                     continue
 
                 chart_table = ChartTable.objects.create(name=name,
@@ -92,4 +90,32 @@ def handle_uploaded_department_file(f):
         except:
             success = False
         print(success)
+    return success
+
+
+def handle_uploaded_chart_courses_file(f):
+    course = xlrd.open_workbook(file_contents=f.read())
+    for sheet in course.sheets():
+        try:
+            number_of_rows = sheet.nrows
+            for row in range(1, number_of_rows):
+                dep = sheet.cell(row, 0).value
+                name = sheet.cell(row, 1).value
+                code = sheet.cell(row, 2).value
+                unit = sheet.cell(row, 3).value
+                table = sheet.cell(row, 4).value
+                is_starred = sheet.cell(row, 5).value
+                dep = Department.objects.filter(name=dep).first()
+                table = ChartTable.objects.filter(code=table, dep=dep).first()
+                if Course.objects.filter(code=code).exists():
+                    course = Course.objects.filter(code=code).update(name=name, code=code, unit=unit, department=dep,
+                                                                     table=table, is_starred=int(is_starred))
+                    continue
+                course = Course.objects.create(name=name, code=code, unit=unit, department=dep,
+                                               table=table, is_starred=int(is_starred))
+            success = True
+        except:
+            success = False
+        print(success)
+
     return success

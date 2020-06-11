@@ -8,7 +8,8 @@ from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
 
-from src.excel_handler import handle_uploaded_semester_file
+from src.excel_handler import handle_uploaded_semester_file, handle_uploaded_chart_table_file, \
+    handle_uploaded_chart_courses_file
 from src.forms import LoginForm
 from src.models import SemesterCourse, UserSchedule, Department, Course, UserPassed, ChartTable, User
 
@@ -125,7 +126,7 @@ def delete_course(request):
     course_id = data.get("course_id")
     user = request.user
     course_code, course_group = course_id.split("-")
-    selected_course = SemesterCourse.objects.filter(course__code=course_code, group=course_group,).first()
+    selected_course = SemesterCourse.objects.filter(course__code=course_code, group=course_group, ).first()
     user_semester, _ = UserSchedule.objects.get_or_create(user=user)
     if selected_course in user_semester.courses.all():
         user_semester.courses.remove(selected_course)
@@ -243,11 +244,21 @@ class SemesterCourseAddView(APIView):
         return render(request, 'semester_course_add.html', {"message": "فایل را ارسال کنید"})
 
 
-class DepartmentChartAddView(APIView):
+class ChartTableAddView(APIView):
 
     def post(self, request):
-        success = handle_uploaded_semester_file(request.FILES['department_file'])
+        success = handle_uploaded_chart_table_file(request.FILES['department_file'])
         return render(request, 'department_chart_add.html', {"success": success})
 
     def get(self, request):
         return render(request, 'department_chart_add.html', {"message": "فایل را ارسال کنید"})
+
+
+class ChartCourseAddView(APIView):
+
+    def post(self, request):
+        success = handle_uploaded_chart_courses_file(request.FILES['course_file'])
+        return render(request, 'add_chart_course.html', {"success": success})
+
+    def get(self, request):
+        return render(request, 'add_chart_course.html', {"message": "فایل را ارسال کنید"})
