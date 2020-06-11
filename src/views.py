@@ -138,6 +138,7 @@ def delete_course(request):
         return JsonResponse({"message": "درس مورد نظر یافت نشد"})
 
 
+@login_required(login_url='/login/')
 def schedule(request):
     departments = []
     for dep in Department.objects.all():
@@ -149,13 +150,13 @@ def schedule(request):
     return render(request, 'grid.html', data)
 
 
+@login_required(login_url='/login/')
 @csrf_exempt
 def graduation(request):
     if request.method == "POST":
         data = json.loads(request.body)
-        username = data.get("username")
         table_no = data.get("group")
-        user = User.objects.filter(username=username).first()
+        user = request.user
         department = user.department
         if table_no == "0":
             table_count = ChartTable.objects.filter(dep=department).count()
@@ -179,9 +180,8 @@ def graduation(request):
 @csrf_exempt
 def add_passed_course(request):
     data = json.loads(request.body)
-    username = data.get("username")
     courses = data.get("passed_courses")
-    user = User.objects.filter(username=username).first()
+    user = request.user
     if_exist = UserPassed.objects.filter(user=user).count()
     if if_exist:
         UserPassed.objects.filter(user=user).delete()
@@ -199,9 +199,8 @@ def add_passed_course(request):
 @csrf_exempt
 def show_remained(request):
     data = json.loads(request.body)
-    username = data.get("username")
     table_number = data.get("table_num")
-    user = User.objects.filter(username=username).first()
+    user = request.user
     department = user.department
     all_courses = Course.objects.filter(department=department, table=table_number)
     user_passed_courses = UserPassed.objects.filter(user=user, courses__table__code=table_number)
@@ -237,7 +236,7 @@ def show_remained(request):
         })
     all_passed = UserPassed.objects.filter(user=user).first().units
     return JsonResponse({
-        "username": username,
+        "username": user.username,
         "remain": remained,
         "optional_remained": optional_remained if optional_remained > 0 else 0,
         "chart_course": course_list,
@@ -245,6 +244,7 @@ def show_remained(request):
     })
 
 
+@login_required(login_url='/login/')
 class SemesterCourseAddView(APIView):
 
     def post(self, request):
@@ -255,6 +255,7 @@ class SemesterCourseAddView(APIView):
         return render(request, 'semester_course_add.html', {"message": "فایل را ارسال کنید"})
 
 
+@login_required(login_url='/login/')
 class DepartmentChartAddView(APIView):
 
     def post(self, request):
