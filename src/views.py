@@ -1,22 +1,68 @@
 import json
 
 from django.contrib import auth
-from django.contrib.auth import authenticate, login
-from django.http import JsonResponse, HttpResponseRedirect
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
 
 from src.excel_handler import handle_uploaded_semester_file
+from src.forms import LoginForm
 from src.models import SemesterCourse, User, UserSchedule, Department, Course, UserPassed, ChartTable
 
-from src.forms import SignUpForm
 
-from terminator.src.forms import LoginForm
+def log_out(req):
+    logout(req)
+    return redirect("/login/")
 
 
+@csrf_exempt
+def log_in(request):
+    user_name = request.POST.get('username', None)
+    pass_word = request.POST.get('password', None)
+    print(user_name)
+    print(pass_word)
+    if user_name is None or pass_word is None:
+        login_form = LoginForm()
+        message = ""
+    else:
+        user = auth.authenticate(username=user_name, password=pass_word)
+        if user is not None:
+            print("user is not none")
+            login(request, user)
+            return redirect('src:home')
+        else:
+            message = 'نام کاربری یا رمز عبور اشتباه است!'
+            login_form = LoginForm(request.POST)
+
+    return render(request, "login.html", {
+        'message': message,
+        'login_form': login_form
+    })
+
+
+def sign_up(request):
+    form = LoginForm(request.POST)
+    if form.is_valid():
+        user = form.save()
+        user.set_password(user.password)
+        user.save()
+        username = form.cleaned_data.get('username')
+        password = form.cleaned_data.get('password')
+        user = authenticate(username=username, password=password)
+        login(request, user)
+        return redirect('src:home')
+    else:
+        form = LoginForm()
+    return render(request, 'login.html', {'login_form': form})
+
+
+@login_required(login_url='/login/')
 def homepage(request):
-    return render(request, 'homepage.html')
+    username = request.user.username
+    return render(request, 'homepage.html', {'username': username})
 
 
 @csrf_exempt
@@ -53,9 +99,8 @@ def courses_list(request):
 
 @csrf_exempt
 def add_course(request):
+    user = request.user
     data = json.loads(request.body)
-    # username = data.get("username")
-    user = User.objects.filter(username="temp").first()
     course_id = data.get("course_id")
     course_code, course_group = course_id.split("-")
     print(course_code, course_group)
@@ -79,10 +124,9 @@ def add_course(request):
 @csrf_exempt
 def delete_course(request):
     data = json.loads(request.body)
-    # username = data.get("username")
     semester = data.get("semester")
     course_id = data.get("course_id")
-    user = User.objects.filter(username="temp").first()  # temp user for now
+    user = request.user
     course_code, course_group = course_id.split("-")
     selected_course = SemesterCourse.objects.filter(course__code=course_code, group=course_group,
                                                     semester=semester).first()
@@ -95,12 +139,11 @@ def delete_course(request):
 
 
 def schedule(request):
-    temp_user, _ = User.objects.get_or_create(username="temp")  # temp user for now
     departments = []
     for dep in Department.objects.all():
         departments.append({"name": dep.name, "id": dep.id})
     data = {
-        "username": temp_user.username,
+        "username": request.user.username,
         "departments": departments
     }
     return render(request, 'grid.html', data)
@@ -130,7 +173,7 @@ def graduation(request):
                 "is_passed": True if course in user_passed_courses.courses.all() else False
             })
         return JsonResponse({"user_courses": course_list})
-    return render(request, 'graduation.html')
+    return render(request, 'graduation.html', {"username": request.user})
 
 
 @csrf_exempt
@@ -220,46 +263,3 @@ class DepartmentChartAddView(APIView):
 
     def get(self, request):
         return render(request, 'department_chart_add.html', {"message": "فایل را ارسال کنید"})
-
-
-@csrf_exempt
-def log_in(request):
-    user_name = request.POST.get('username', None)
-    pass_word = request.POST.get('password', None)
-    print(user_name)
-    print(pass_word)
-    if user_name is None or pass_word is None:
-        login_form = LoginForm()
-        message = ""
-        print("empty")
-    else:
-        user = auth.authenticate(username=user_name, password=pass_word)
-        if user is not None:
-            print("user is not none")
-            login(request, user)
-            return redirect('src:home')
-        else:
-            print("wrong")
-            message = 'نام کاربری یا رمز عبور اشتباه است!'
-            login_form = LoginForm(request.POST)
-
-    return render(request, "login.html", {
-        'message': message,
-        'login_form': login_form
-    })
-
-
-def sign_up(request):
-    form = LoginForm(request.POST)
-    if form.is_valid():
-        user = form.save()
-        user.set_password(user.password)
-        user.save()
-        username = form.cleaned_data.get('username')
-        password = form.cleaned_data.get('password')
-        user = authenticate(username=username, password=password)
-        login(request, user)
-        return redirect('src:home')
-    else:
-        form = LoginForm()
-    return render(request, 'login.html', {'login_form': form})
