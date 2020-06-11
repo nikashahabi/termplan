@@ -67,11 +67,12 @@ def homepage(request):
 
 @csrf_exempt
 def courses_list(request):
+    print(request.body)
     data = json.loads(request.body)
-    department_id = data.get("dep_id")
-    semester = data.get("semester")
+    print(data)
+    department_id = data.get("dep_id", None)
     courses = []
-    data_of_db = SemesterCourse.objects.filter(semester__exact=semester, course__department_id=department_id)
+    data_of_db = SemesterCourse.objects.filter(course__department_id=department_id)
     for data in data_of_db:
         days = [data.day1, data.day2]
         courses.append({
@@ -88,7 +89,6 @@ def courses_list(request):
             "department": data.course.department.name,
             "units": data.course.unit,
             "instructor": data.professor.name,
-            "semester": data.semester,
             "course_number": data.course.code,
             "info": data.info,
             "capacity": data.capacity
@@ -104,10 +104,8 @@ def add_course(request):
     course_id = data.get("course_id")
     course_code, course_group = course_id.split("-")
     print(course_code, course_group)
-    semester = data.get("semester")
-    selected_course = SemesterCourse.objects.filter(course__code=course_code, group=course_group,
-                                                    semester=semester).first()
-    user_semester, _ = UserSchedule.objects.get_or_create(user=user, semester=semester)
+    selected_course = SemesterCourse.objects.filter(course__code=course_code, group=course_group).first()
+    user_semester, _ = UserSchedule.objects.get_or_create(user=user)
     # overlapping_course = user_semester.courses.filter(Q(day1=wanted_course.day1) | Q(day2=wanted_course.day2), Q(
     #     start_time__range=(wanted_course.start_time, wanted_course.end_time)) | Q(
     #     end_time__range=(wanted_course.start_time, wanted_course.end_time))).exclude(
@@ -124,13 +122,11 @@ def add_course(request):
 @csrf_exempt
 def delete_course(request):
     data = json.loads(request.body)
-    semester = data.get("semester")
     course_id = data.get("course_id")
     user = request.user
     course_code, course_group = course_id.split("-")
-    selected_course = SemesterCourse.objects.filter(course__code=course_code, group=course_group,
-                                                    semester=semester).first()
-    user_semester, _ = UserSchedule.objects.get_or_create(user=user, semester=semester)
+    selected_course = SemesterCourse.objects.filter(course__code=course_code, group=course_group,).first()
+    user_semester, _ = UserSchedule.objects.get_or_create(user=user)
     if selected_course in user_semester.courses.all():
         user_semester.courses.remove(selected_course)
         return JsonResponse({"message": "با موفقیت حذف شد"})
@@ -159,14 +155,11 @@ def graduation(request):
         table_no = data.get("group")
         user = request.user
         department = User.objects.filter(username=user.username).first().department
-        print(department)
         if table_no == "0":
             table_count = ChartTable.objects.filter(dep=department).count()
             return JsonResponse({"group_count": table_count})
         user_passed_courses = UserPassed.objects.filter(user=user).first()
-        print(user_passed_courses)
         table_courses = Course.objects.filter(table__code=table_no, department=department)
-        print(table_courses)
         course_list = []
         for course in table_courses:
             course_list.append({
