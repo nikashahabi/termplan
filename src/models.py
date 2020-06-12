@@ -37,7 +37,7 @@ class Course(models.Model):
     name = models.CharField(max_length=256)
     unit = models.IntegerField(null=True, blank=True)
     code = models.IntegerField(unique=True)
-    department = models.ForeignKey(Department, on_delete=models.CASCADE, default="MCS")
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, default=1)
     table = models.ForeignKey(ChartTable, on_delete=models.CASCADE, null=True)
     is_starred = models.BooleanField(default=False)
 
@@ -54,7 +54,7 @@ class SemesterCourse(models.Model):
     day2 = models.CharField(max_length=256, null=True, blank=True)
     exam = models.CharField(max_length=128, null=True, blank=True)
     ta_day = models.CharField(max_length=256, null=True, blank=True)
-    ta_time = models.TimeField(null=True, blank=True)
+    ta_time = models.CharField(max_length=256,null=True, blank=True)
     professor = models.ForeignKey(Professor, on_delete=models.CASCADE, null=True, blank=True)
     group = models.IntegerField(default=1)
     info = models.TextField(null=True, blank=True)
