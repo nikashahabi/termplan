@@ -46,7 +46,7 @@ class Course(models.Model):
 
 
 class SemesterCourse(models.Model):
-    semester = models.CharField(max_length=256, null=True, blank=True)
+    # semester = models.CharField(max_length=256, null=True, blank=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, null=True, blank=True)
     start_time = models.FloatField(null=True, blank=True)
     end_time = models.FloatField(null=True, blank=True)
@@ -67,10 +67,10 @@ class SemesterCourse(models.Model):
 class UserSchedule(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     courses = models.ManyToManyField(SemesterCourse)
-    semester = models.CharField(max_length=256, null=True, blank=True)
+    # semester = models.CharField(max_length=256, null=True, blank=True)
 
     def __str__(self):
-        return f"user:{self.user.username} - semester:{self.semester}"
+        return f"user:{self.user.username}"
 
 
 class UserPassed(models.Model):

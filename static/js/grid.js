@@ -51,9 +51,9 @@ var grid = {
         for (var i = 0; i < course.events.length; i++) {
             console.log(course.events);
             var startY = calculatePixel(course.events[i].start);
-            console.log("starty"+startY);
+            console.log("starty" + startY);
             var endY = calculatePixel(course.events[i].end) - 4;
-            console.log("endy"+endY);
+            console.log("endy" + endY);
             var height = endY - startY;
             var res = sprintf('<div class="event %s %s" style="top:%dpx;height:%dpx;width:%d%%;" course-id="%s"><a class="del-button"></a><p class="course-id">%s</p><p class="course-title">%s</p><p class="instructor">%s</p></div>',
                 "course-" + course.course_id,
@@ -66,13 +66,13 @@ var grid = {
                 '<a href="/courses/info/' + course.course_number + '/" class="show-course-info">' + course.name + "</a>",
                 course.instructor);
 
-            $("#weekday-" + course.events[i].day).append(res);
+            $("#weekday-" + Math.floor(course.events[i].day)).append(res);
         }
         if (!preview && !initial) {
             $.ajax({
                 url: '/add_course',
                 type: 'post',
-                data: JSON.stringify({course_id: course.course_id, semester: "98-1"}),
+                data: JSON.stringify({course_id: course.course_id, semester: "98 first"}),
                 success: function (data) {
                 }
             });
@@ -149,9 +149,10 @@ function get_course_list(department_id) {
         $.ajax({
             url: '/courses_list',
             type: 'post',
-            data: JSON.stringify({dep_id: department_id, semester: "98-1"}),
+            data: JSON.stringify({dep_id: department_id, semester: "98 first"}),
             success: function (data) {
                 var courses = data.data;
+                console.log(courses);
                 $("#course-group-list").empty();
                 for (i = 0; i < courses.length; i++) {
                     $("#course-group-list").append(sprintf('<li><a href="#">%s</a></li>', courses[i].name));
@@ -234,7 +235,7 @@ $(".grid").on("click", ".del-button", function () {
     $.ajax({
         url: '/delete_course',
         type: 'post',
-        data: JSON.stringify({course_id: $(this).parent().attr('course-id'),semester:"98-1"}),
+        data: JSON.stringify({course_id: $(this).parent().attr('course-id'), semester: "98 first"}),
         success: function (data) {
             grid.removeCourse(cid);
             $('.course-' + cid).remove();

@@ -1,28 +1,79 @@
 import json
 
-from django.contrib.auth import authenticate
+from django.contrib import auth
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
 
-from src.excel_handler import handle_uploaded_semester_file
-from src.models import SemesterCourse, User, UserSchedule, Department, Course, UserPassed, ChartTable
+from src.excel_handler import handle_uploaded_semester_file, handle_uploaded_chart_table_file, \
+    handle_uploaded_chart_courses_file
+from src.forms import LoginForm
+from src.models import SemesterCourse, UserSchedule, Department, Course, UserPassed, ChartTable, User
 
-from src.forms import SignUpForm
+
+def log_out(req):
+    logout(req)
+    return redirect("/login/")
 
 
+@csrf_exempt
+def log_in(request):
+    user_name = request.POST.get('username', None)
+    pass_word = request.POST.get('password', None)
+    print(user_name)
+    print(pass_word)
+    if user_name is None or pass_word is None:
+        login_form = LoginForm()
+        message = ""
+    else:
+        user = auth.authenticate(username=user_name, password=pass_word)
+        if user is not None:
+            print("user is not none")
+            login(request, user)
+            return redirect('src:home')
+        else:
+            message = 'نام کاربری یا رمز عبور اشتباه است!'
+            login_form = LoginForm(request.POST)
+
+    return render(request, "login.html", {
+        'message': message,
+        'login_form': login_form
+    })
+
+
+def sign_up(request):
+    form = LoginForm(request.POST)
+    if form.is_valid():
+        user = form.save()
+        user.set_password(user.password)
+        user.save()
+        username = form.cleaned_data.get('username')
+        password = form.cleaned_data.get('password')
+        user = authenticate(username=username, password=password)
+        login(request, user)
+        return redirect('src:home')
+    else:
+        form = LoginForm()
+    return render(request, 'login.html', {'login_form': form})
+
+
+@login_required(login_url='/login/')
 def homepage(request):
-    return render(request, 'homepage.html')
+    username = request.user.username
+    return render(request, 'homepage.html', {'username': username})
 
 
 @csrf_exempt
 def courses_list(request):
+    print(request.body)
     data = json.loads(request.body)
-    department_id = data.get("dep_id")
-    semester = data.get("semester")
+    print(data)
+    department_id = data.get("dep_id", None)
     courses = []
-    data_of_db = SemesterCourse.objects.filter(semester__exact=semester, course__department_id=department_id)
+    data_of_db = SemesterCourse.objects.filter(course__department_id=department_id)
     for data in data_of_db:
         days = [data.day1, data.day2]
         courses.append({
@@ -39,7 +90,6 @@ def courses_list(request):
             "department": data.course.department.name,
             "units": data.course.unit,
             "instructor": data.professor.name,
-            "semester": data.semester,
             "course_number": data.course.code,
             "info": data.info,
             "capacity": data.capacity
@@ -50,16 +100,13 @@ def courses_list(request):
 
 @csrf_exempt
 def add_course(request):
+    user = request.user
     data = json.loads(request.body)
-    # username = data.get("username")
-    user = User.objects.filter(username="temp").first()
     course_id = data.get("course_id")
     course_code, course_group = course_id.split("-")
     print(course_code, course_group)
-    semester = data.get("semester")
-    selected_course = SemesterCourse.objects.filter(course__code=course_code, group=course_group,
-                                                    semester=semester).first()
-    user_semester, _ = UserSchedule.objects.get_or_create(user=user, semester=semester)
+    selected_course = SemesterCourse.objects.filter(course__code=course_code, group=course_group).first()
+    user_semester, _ = UserSchedule.objects.get_or_create(user=user)
     # overlapping_course = user_semester.courses.filter(Q(day1=wanted_course.day1) | Q(day2=wanted_course.day2), Q(
     #     start_time__range=(wanted_course.start_time, wanted_course.end_time)) | Q(
     #     end_time__range=(wanted_course.start_time, wanted_course.end_time))).exclude(
@@ -76,14 +123,11 @@ def add_course(request):
 @csrf_exempt
 def delete_course(request):
     data = json.loads(request.body)
-    # username = data.get("username")
-    semester = data.get("semester")
     course_id = data.get("course_id")
-    user = User.objects.filter(username="temp").first()  # temp user for now
+    user = request.user
     course_code, course_group = course_id.split("-")
-    selected_course = SemesterCourse.objects.filter(course__code=course_code, group=course_group,
-                                                    semester=semester).first()
-    user_semester, _ = UserSchedule.objects.get_or_create(user=user, semester=semester)
+    selected_course = SemesterCourse.objects.filter(course__code=course_code, group=course_group, ).first()
+    user_semester, _ = UserSchedule.objects.get_or_create(user=user)
     if selected_course in user_semester.courses.all():
         user_semester.courses.remove(selected_course)
         return JsonResponse({"message": "با موفقیت حذف شد"})
@@ -91,51 +135,50 @@ def delete_course(request):
         return JsonResponse({"message": "درس مورد نظر یافت نشد"})
 
 
+@login_required(login_url='/login/')
 def schedule(request):
-    temp_user, _ = User.objects.get_or_create(username="temp")  # temp user for now
+    user = request.user
     departments = []
     for dep in Department.objects.all():
         departments.append({"name": dep.name, "id": dep.id})
     data = {
-        "username": temp_user.username,
+        "username": user.username,
         "departments": departments
     }
     return render(request, 'grid.html', data)
 
 
+@login_required(login_url='/login/')
 @csrf_exempt
 def graduation(request):
     if request.method == "POST":
         data = json.loads(request.body)
-        username = data.get("username")
         table_no = data.get("group")
-        user = User.objects.filter(username=username).first()
-        department = user.department
-        if table_no == "0":
+        user = request.user
+        department = User.objects.filter(username=user.username).first().department
+        if table_no == "0" or table_no == 0:
             table_count = ChartTable.objects.filter(dep=department).count()
             return JsonResponse({"group_count": table_count})
-        user_passed_courses = UserPassed.objects.filter(user=user, ).first()
-        print(user_passed_courses)
-        table_courses = Course.objects.filter(table__code=table_no, department=user.department)
-        print(table_courses)
+        user_passed_courses = UserPassed.objects.filter(user=user)
+        table_courses = Course.objects.filter(table__code=table_no, department=department)
         course_list = []
         for course in table_courses:
             course_list.append({
                 "id": course.code,
                 "name": course.name,
                 "is_starred": course.is_starred,
-                "is_passed": True if course in user_passed_courses.courses.all() else False
+                "is_passed": True if user_passed_courses.exists() and course in user_passed_courses.first().courses.all() else False
             })
-        return JsonResponse({"user_courses": course_list})
-    return render(request, 'graduation.html')
+        table = ChartTable.objects.filter(code=table_no, dep=department).first()
+        return JsonResponse({"user_courses": course_list, "info": table.info})
+    return render(request, 'graduation.html', {"username": request.user})
 
 
 @csrf_exempt
 def add_passed_course(request):
     data = json.loads(request.body)
-    username = data.get("username")
     courses = data.get("passed_courses")
-    user = User.objects.filter(username=username).first()
+    user = request.user
     if_exist = UserPassed.objects.filter(user=user).count()
     if if_exist:
         UserPassed.objects.filter(user=user).delete()
@@ -153,10 +196,9 @@ def add_passed_course(request):
 @csrf_exempt
 def show_remained(request):
     data = json.loads(request.body)
-    username = data.get("username")
     table_number = data.get("table_num")
-    user = User.objects.filter(username=username).first()
-    department = user.department
+    user = request.user
+    department = User.objects.filter(username=user.username).first().department
     all_courses = Course.objects.filter(department=department, table=table_number)
     user_passed_courses = UserPassed.objects.filter(user=user, courses__table__code=table_number)
     remained = []
@@ -174,12 +216,6 @@ def show_remained(request):
                 passed_unit += user_course.unit
     chart = ChartTable.objects.filter(dep=department, code=table_number).first()
     optional_remained = chart.req_not_stared_units - passed_unit
-    # chart_table = ChartTable.objects.filter(dep=department, code=table_number).first()
-    # if passed_unit <= chart_table.req_passed_units:
-    #     for user_course in user_passed_courses.courses.all():
-    #         if not user_course.is_starred:
-    #             remained.append({"course_name": user_course.course.department,
-    #                              "necessity": False})
     table_courses = Course.objects.filter(table__code=table_number, department=department)
     course_list = []
     for course in table_courses:
@@ -189,13 +225,13 @@ def show_remained(request):
             "is_passed": True if user_passed_courses.exists() and course in user_passed_courses.first().courses.all()
             else False
         })
-    all_passed = UserPassed.objects.filter(user=user).first().units
+    all_passed = UserPassed.objects.filter(user=user).first()
     return JsonResponse({
-        "username": username,
+        "username": user.username,
         "remain": remained,
         "optional_remained": optional_remained if optional_remained > 0 else 0,
         "chart_course": course_list,
-        "all_passed": all_passed
+        "all_passed": all_passed.units if all_passed else 0
     })
 
 
@@ -209,40 +245,21 @@ class SemesterCourseAddView(APIView):
         return render(request, 'semester_course_add.html', {"message": "فایل را ارسال کنید"})
 
 
-class DepartmentChartAddView(APIView):
+class ChartTableAddView(APIView):
 
     def post(self, request):
-        success = handle_uploaded_semester_file(request.FILES['department_file'])
+        success = handle_uploaded_chart_table_file(request.FILES['department_file'])
         return render(request, 'department_chart_add.html', {"success": success})
 
     def get(self, request):
         return render(request, 'department_chart_add.html', {"message": "فایل را ارسال کنید"})
 
 
-@csrf_exempt
-def login(request):
-    if request.method == 'GET':
-        return render(request, 'auth/../templates/login.html')
-    elif request.method == 'POST':
-        user_name = request.POST.get('username')
-        pass_word = request.POST.get('password')
-        user = auth.authenticate(username=user_name, password=pass_word)
-        if user is None:
-            return JsonResponse({'Error': 'Wrong user name or password'})
-        else:
-            auth.login(request, user)
-            return JsonResponse({"text": "good"})
+class ChartCourseAddView(APIView):
 
+    def post(self, request):
+        success = handle_uploaded_chart_courses_file(request.FILES['course_file'])
+        return render(request, 'add_chart_course.html', {"success": success})
 
-def signup(request):
-    form = SignUpForm(request.POST)
-    if form.is_valid():
-        form.save()
-        username = form.cleaned_data.get('username')
-        password = form.cleaned_data.get('password1')
-        user = authenticate(username=username, password=password)
-        login(request, user)
-        return redirect('home')
-    else:
-        form = SignUpForm()
-    return render(request, 'signup.html', {'form': form})
+    def get(self, request):
+        return render(request, 'add_chart_course.html', {"message": "فایل را ارسال کنید"})
