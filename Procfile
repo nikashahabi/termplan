@@ -1,1 +1,1 @@
-web: gunicorn terminator.wsgi
+web: gunicorn termplan.wsgi
