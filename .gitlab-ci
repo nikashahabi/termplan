@@ -1,0 +1,8 @@
+  stage: deploy
+  variables:
+    HEROKU_APP: django
+  only:
+    - master
+  script:
+    - gem install dpl
+    - dpl --provider=heroku --app=termplan --api-key=f9352adc-39ad-41d2-8c7e-1d74e461471b
