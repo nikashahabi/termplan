@@ -156,7 +156,7 @@ def graduation(request):
         table_no = data.get("group")
         user = request.user
         department = User.objects.filter(username=user.username).first().department
-        if table_no == "0":
+        if table_no == "0" or table_no == 0:
             table_count = ChartTable.objects.filter(dep=department).count()
             return JsonResponse({"group_count": table_count})
         user_passed_courses = UserPassed.objects.filter(user=user)
