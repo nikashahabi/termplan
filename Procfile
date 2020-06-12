@@ -1,1 +1,1 @@
-web: gunicorn terminator.wsgi --log-file -
+web: gunicorn terminator.wsgi
