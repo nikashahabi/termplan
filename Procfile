@@ -1,1 +1,1 @@
-web: gunicorn termplan.wsgi
+web: gunicorn terminator.wsgi --log-file -
