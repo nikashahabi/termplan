@@ -159,7 +159,7 @@ def graduation(request):
         if table_no == "0":
             table_count = ChartTable.objects.filter(dep=department).count()
             return JsonResponse({"group_count": table_count})
-        user_passed_courses = UserPassed.objects.filter(user=user).first()
+        user_passed_courses = UserPassed.objects.filter(user=user)
         table_courses = Course.objects.filter(table__code=table_no, department=department)
         course_list = []
         for course in table_courses:
@@ -167,7 +167,7 @@ def graduation(request):
                 "id": course.code,
                 "name": course.name,
                 "is_starred": course.is_starred,
-                "is_passed": True if course in user_passed_courses.courses.all() else False
+                "is_passed": True if user_passed_courses.exists() and course in user_passed_courses.first().courses.all() else False
             })
         return JsonResponse({"user_courses": course_list})
     return render(request, 'graduation.html', {"username": request.user})
