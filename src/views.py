@@ -169,7 +169,8 @@ def graduation(request):
                 "is_starred": course.is_starred,
                 "is_passed": True if user_passed_courses.exists() and course in user_passed_courses.first().courses.all() else False
             })
-        return JsonResponse({"user_courses": course_list})
+        table = ChartTable.objects.filter(code=table_no, dep=department).first()
+        return JsonResponse({"user_courses": course_list, "info": table.info})
     return render(request, 'graduation.html', {"username": request.user})
 
 
