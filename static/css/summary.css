@@ -145,7 +145,6 @@ table tr:hover td {
 
 .summaryremove {
 	position:relative;
-	background-image: url("../images/remove-icon.png");
 	width: 16px;
 	height: 16px;
 	margin:0 auto;
