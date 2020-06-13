@@ -201,3 +201,47 @@ class TestGraduation(APITestCase):
         response = self.client.post('/add_passed_course/', data, format='json')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(UserPassed.objects.filter(user=user).count(), 1)
+
+
+class TestShowRemained(APITestCase):
+
+    def test_authenticated_user(self):
+        department = Department.objects.create(name="test_dep")
+        user = User.objects.create(username='test', password='1234', department=department)
+        prof1 = Professor.objects.create(name="prof1", department=department)
+        table = ChartTable.objects.create(dep=department, code=1, req_passed_units=3, req_not_stared_units=0)
+        table2 = ChartTable.objects.create(dep=department, code=2, req_passed_units=10, req_not_stared_units=3)
+        course1 = Course.objects.create(name="course1", code=1, department=department, unit=3, table=table,
+                                        is_starred=True)
+        course2 = Course.objects.create(name="course2", code=2, department=department, unit=4, table=table2,
+                                        is_starred=True)
+        up1 = UserPassed.objects.create(user=user, units=3)
+        up1.courses.add(course1)
+        up1.courses.add(course2)
+        self.client.force_login(user=user)
+        # with no optional
+        response = self.client.post("/remained_courses/", data={'table_num': "1"}, format='json')
+        self.assertEqual(response.status_code, 200)
+        # print(55555555555555555555)
+        expected_response = {
+            "username": user.username,
+            "remain": [],
+            "optional_remained": 0,
+            "chart_course": [{"course_id": course1.code,
+                              "course_name": course1.name,
+                              "is_passed": True}],
+            "all_passed": 3}
+        self.assertEqual(json.loads(response.content), expected_response)
+        # with optional
+        response = self.client.post("/remained_courses/", data={'table_num': "2"}, format='json')
+        self.assertEqual(response.status_code, 200)
+        # print(55555555555555555555)
+        expected_response = {
+            "username": user.username,
+            "remain": [],
+            "optional_remained": 3,
+            "chart_course": [{"course_id": course2.code,
+                              "course_name": course2.name,
+                              "is_passed": True}],
+            "all_passed": 3}
+        self.assertEqual(json.loads(response.content), expected_response)
