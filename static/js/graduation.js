@@ -92,6 +92,7 @@ function create_table(courses, index, opt){
             necessity = "هست";
         $("#remained-unit-" + (ind+1)).append(sprintf('<tr><th>%s</th><th>%s</th><th>%s</th></tr>', courses[i].course_name , courses[i].course_unit, necessity));
     }
+
     $("#remained-unit-" + (ind+1)).append(sprintf('<tr><th>درس اختیاری</th><th>%s</th><th>هست</th></tr>', opt));
 
 }
@@ -122,14 +123,20 @@ function add_course(groupId) {
         data: JSON.stringify({group: groupId, username: "temp"}),
         success: function (data) {
             var courses = data.user_courses;
+            alert(data.info);
             for (i = 0; i < courses.length; i++) {
                 var check = "";
+                var starred = "";
                 if (courses[i].is_passed) {
                     check = "checked";
                 }
-                $("#course-group-" + groupId).append(sprintf('<li><input type="checkbox" name="chk" id="%s" %s>%s</input></li>', courses[i].id, check, courses[i].name));
+                if (courses[i].is_starred) {
+                    starred = "*";
+                }
+                $("#course-group-" + groupId).append(sprintf('<li><input type="checkbox" name="chk" id="%s" %s>%s%s</input></li>', courses[i].id, check, starred, courses[i].name));
                 $("#course-group-" + groupId + " li:last").data('course', courses[i]);
             }
+            $("#course-group-" + groupId).append(sprintf('<li><p>%s</p></li>', data.info));
         },
     });
 
