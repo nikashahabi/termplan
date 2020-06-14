@@ -68,6 +68,7 @@ def homepage(request):
 
 @csrf_exempt
 def courses_list(request):
+    user = request.user
     print(request.body)
     data = json.loads(request.body)
     print(data)
@@ -75,26 +76,27 @@ def courses_list(request):
     courses = []
     data_of_db = SemesterCourse.objects.filter(course__department_id=department_id)
     for data in data_of_db:
-        days = [data.day1, data.day2]
-        courses.append({
-            "course_id": f"{data.course.code}-{data.group}",
-            "name": data.course.name,
-            "class_times": [{
-                "day": day,
-                "start": data.start_time,
-                "end": data.end_time
-            } for day in days if day],
-            "ta_time": data.ta_time,
-            "ta_day": data.ta_day,
-            "exam_time": data.exam,
-            "department": data.course.department.name,
-            "units": data.course.unit,
-            "instructor": data.professor.name,
-            "course_number": data.course.code,
-            "info": data.info,
-            "capacity": data.capacity
+        if not is_passed(user, data.course):
+            days = [data.day1, data.day2]
+            courses.append({
+                "course_id": f"{data.course.code}-{data.group}",
+                "name": data.course.name,
+                "class_times": [{
+                    "day": day,
+                    "start": data.start_time,
+                    "end": data.end_time
+                } for day in days if day],
+                "ta_time": data.ta_time,
+                "ta_day": data.ta_day,
+                "exam_time": data.exam,
+                "department": data.course.department.name,
+                "units": data.course.unit,
+                "instructor": data.professor.name,
+                "course_number": data.course.code,
+                "info": data.info,
+                "capacity": data.capacity
 
-        })
+            })
     return JsonResponse({"data": courses})
 
 
@@ -167,7 +169,7 @@ def graduation(request):
                 "id": course.code,
                 "name": course.name,
                 "is_starred": course.is_starred,
-                "is_passed": True if user_passed_courses.exists() and course in user_passed_courses.first().courses.all() else False
+                "is_passed": is_passed(user, course)
             })
         table = ChartTable.objects.filter(code=table_no, dep=department).first()
         return JsonResponse({"user_courses": course_list, "info": table.info})
@@ -204,8 +206,7 @@ def show_remained(request):
     remained = []
     passed_unit = 0
     for course in all_courses:
-        if course.is_starred and (
-                not user_passed_courses.exists() or course not in user_passed_courses.first().courses.all()):
+        if course.is_starred and not is_passed(user, course):
             remained.append({"course_name": course.name,
                              "course_id": course.code,
                              "course_unit": course.unit,
@@ -222,8 +223,7 @@ def show_remained(request):
         course_list.append({
             "course_id": course.code,
             "course_name": course.name,
-            "is_passed": True if user_passed_courses.exists() and course in user_passed_courses.first().courses.all()
-            else False
+            "is_passed": is_passed(user, course)
         })
     all_passed = UserPassed.objects.filter(user=user).first()
     return JsonResponse({
@@ -233,6 +233,15 @@ def show_remained(request):
         "chart_course": course_list,
         "all_passed": all_passed.units if all_passed else 0
     })
+
+
+def is_passed(user, course):
+    user_passed_courses = UserPassed.objects.filter(user=user)
+    if not user_passed_courses.exists():
+        return False
+    if course in user_passed_courses.first().courses.all():
+        return True
+    return False
 
 
 class SemesterCourseAddView(APIView):
