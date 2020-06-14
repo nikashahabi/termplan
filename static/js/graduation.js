@@ -68,20 +68,21 @@ function show_remained(index){
         success: function(data){
         courses = data.remain;
         optional_remained = data.optional_remained;
-        create_table(courses, ind, optional_remained);
+        create_table(courses, ind, optional_remained, data.all_passed);
         
         },
     });
 }
-function create_table(courses, index, opt){
+function create_table(courses, index, opt, psd){
     
     if(!table_keshidam){
         for(i = 0; i < tedad_goroha; i++){
             $("#tablee").append(sprintf('<table class="w3-table-all w3-card-4" id="remained-unit-%s">  <caption> درس های گروه %s</caption><tr><th>نام درس</th><th>تعداد واحد</th><th>اجباری</th></tr></table>', i + 1, i + 1));
         }
+         
         table_keshidam = true;
     }
-    
+    document.getElementById("vahed_pass_shode").innerHTML = ("تعداد واحدهای پاس شده : " + psd);
     
     var ind = parseInt(index);
     
