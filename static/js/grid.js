@@ -47,7 +47,6 @@ var grid = {
             localStorage.setItem("addedItems", JSON.stringify(grid.addedItems));
 
         }
-
         for (var i = 0; i < course.events.length; i++) {
             console.log(course.events);
             var startY = calculatePixel(course.events[i].start);
@@ -55,6 +54,7 @@ var grid = {
             var endY = calculatePixel(course.events[i].end) - 4;
             console.log("endy" + endY);
             var height = endY - startY;
+
             var res = sprintf('<div class="event %s %s" style="top:%dpx;height:%dpx;width:%d%%;" course-id="%s"><a class="del-button"></a><p class="course-id">%s</p><p class="course-title">%s</p><p class="instructor">%s</p></div>',
                 "course-" + course.course_id,
                 (preview ? ' event-preview' : 'event-final'),
