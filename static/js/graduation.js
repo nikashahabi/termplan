@@ -124,6 +124,7 @@ function add_course(groupId) {
         data: JSON.stringify({group: groupId, username: "temp"}),
         success: function (data) {
             var courses = data.user_courses;
+            alert(data.info);
             for (i = 0; i < courses.length; i++) {
                 var check = "";
                 var starred = "";
